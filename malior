@@ -1,0 +1,13 @@
+#!/bin/env bash
+# set -ex
+# TODO: stricter permissions
+sudo chmod 666 /dev/mali0 
+sudo chmod 666 /dev/dri/*
+sudo docker run -it --init ${MALIOR_DOPT_RM:---rm} --name=${MALIOR_DOPT_NAME:-malior} --privileged=true \
+    -e WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-0} \
+    -e XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/1000} \
+    -e DISPLAY=${DISPLAY:-":0"} \
+    -v /dev/mali0:/dev/mali0 -v /dev/dri:/dev/dri \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -v /run/user:/run/user \
+    chisbread/rk3588-gaming:${MALIOR_EXEC_GAME:-base} $@

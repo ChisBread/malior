@@ -1,0 +1,2 @@
+FROM chisbread/rk3588-gaming:base
+# TODO compile, install, update etc..
