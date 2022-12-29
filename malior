@@ -31,8 +31,13 @@ MALIOR_RUNNING=1
 if [ "`sudo docker ps|grep malior-runtime-$USER`" == "" ]; then
     MALIOR_RUNNING=0
 fi
+DOCKER_OPTS='-i'
+if [ -t 0 ] && [ -t 1 ]; then
+    DOCKER_OPTS=$DOCKER_OPTS" -t"
+fi
+
 function runtime_start() {
-    sudo docker run -it --init -d --restart unless-stopped --name=malior-runtime-$USER --privileged=true \
+    sudo docker run $DOCKER_OPTS --init -d --restart unless-stopped --name=malior-runtime-$USER --privileged=true \
             -e TZ=${TZ} -e LANG=${ALNG} \
             -e WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-0} \
             -e XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/`id -u`} \
@@ -43,7 +48,7 @@ function runtime_start() {
             -v ${HOME}/.config/malior:/home/player/.config/malior \
             -v ${HOME}/.local/malior:/home/player/.local/malior \
             chisbread/rk3588-gaming:${MALIOR_TAG:-base} bash
-    sudo docker exec -it --user=root malior-runtime-$USER \
+    sudo docker exec $DOCKER_OPTS --user=root malior-runtime-$USER \
         bash -c "chown player:player ${XDG_RUNTIME_DIR:-/run/user/`id -u`} /home/player/{.config,.local} && chmod 0700 ${XDG_RUNTIME_DIR:-/run/user/`id -u`}"
 }
 # process the first parametre only
@@ -98,7 +103,7 @@ if [ $MALIOR_RUNNING -eq 0 ]; then
     runtime_start
     exit
 fi
-sudo docker exec -it ${MALIOR_EXEC_OPT:-} malior-runtime-$USER bash -c "source /home/player/.config/malior/envs.sh ; $*"
+sudo docker exec $DOCKER_OPTS ${MALIOR_EXEC_OPT:-} malior-runtime-$USER bash -c "source /home/player/.config/malior/envs.sh ; $*"
 if [ "$?" != 0 ]; then
     echo "Doesn't look good? Try reinstalling 'malior install \${THE_GAME}'"
 fi
