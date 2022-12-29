@@ -50,6 +50,8 @@ function runtime_start() {
             chisbread/rk3588-gaming:${MALIOR_TAG:-base} bash
     sudo docker exec $DOCKER_OPTS --user=root malior-runtime-$USER \
         bash -c "chown player:player ${XDG_RUNTIME_DIR:-/run/user/`id -u`} /home/player/{.config,.local} && chmod 0700 ${XDG_RUNTIME_DIR:-/run/user/`id -u`}"
+    sudo docker exec $DOCKER_OPTS malior-runtime-$USER \
+        bash -c "ln -sf /home/player/.local/malior/share /home/player/.local/share"
 }
 # process the first parametre only
 case $1 in
@@ -104,6 +106,3 @@ if [ $MALIOR_RUNNING -eq 0 ]; then
     exit
 fi
 sudo docker exec $DOCKER_OPTS ${MALIOR_EXEC_OPT:-} malior-runtime-$USER bash -c "source /home/player/.config/malior/envs.sh ; $*"
-if [ "$?" != 0 ]; then
-    echo "Doesn't look good? Try reinstalling 'malior install \${THE_GAME}'"
-fi

@@ -4,8 +4,9 @@ sudo wget -q https://github.com/ChisBread/malior/raw/main/malior -O /usr/local/b
 sudo chmod +x /usr/local/bin/malior
 echo "Done."
 echo "Initialize configuration directory.."
-mkdir -p ~/.config/malior || true
-mkdir -p ~/.local/malior/bin || true
+[ ! -d ~/.config/malior ] && mkdir -p ~/.config/malior
+[ ! -d ~/.local/malior/bin ] && mkdir -p ~/.local/malior/bin
+[ ! -d ~/.local/malior/share ] && mkdir -p ~/.local/malior/share
 cat > ~/.config/malior/envs.sh <<EOF
 export XONOTIC_DIR=~/.local/malior/xonotic
 export PATH=~/.local/malior/bin:/usr/games:\$PATH
