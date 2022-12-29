@@ -46,3 +46,5 @@ malior glmark2-es2-wayland
 | ----------------------------- | --------- |
 | glmark2                       | ✅        | 
 | xonotic                       | ✅        | 
+| openmw                        | ❓        | 
+| steam                         | ❓        | 
