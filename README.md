@@ -40,7 +40,17 @@ malior glmark2-es2
 malior glmark2-wayland
 malior glmark2-es2-wayland
 ``` 
-
+## Tips
+- Already have xonotic installed locally?
+```
+# game dir
+mv ${LOCAL_XONOTIC_DIR} $HOME/.local/malior/xonotic
+# config dir
+mv $HOME/.xonotic $HOME/.config/malior/.xonotic
+# ln -s $HOME/.local/malior/xonotic ${LOCAL_XONOTIC_DIR}
+# ln -s $HOME/.config/malior/.xonotic $HOME/.xonotic
+malior install xonotic # Will not re-download all content
+```
 ## Tested
 | Application                   | playable  |
 | ----------------------------- | --------- |
