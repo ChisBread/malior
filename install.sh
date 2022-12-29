@@ -8,6 +8,6 @@ mkdir -p ~/.config/malior || true
 mkdir -p ~/.local/malior/bin || true
 cat > ~/.config/malior/envs.sh <<EOF
 export XONOTIC_DIR=~/.local/malior/xonotic
-export PATH=\$PATH:~/.local/malior/bin
+export PATH=~/.local/malior/bin:/usr/games:\$PATH
 EOF
 echo "Done."
