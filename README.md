@@ -24,7 +24,7 @@ Command:
     help             This usage guide
     update           Update malior image
     recreate         Recreate malior runtime container
-    distroy          Stop and remove malior runtime container
+    destroy          Stop and remove malior runtime container
     pause            Pause(docker stop) malior runtime container
     resume           Resume(docker start) malior runtime container
     install|update   Install or update game
