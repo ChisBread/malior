@@ -56,5 +56,5 @@ malior install xonotic # Will not re-download all content
 | ----------------------------- | --------- |
 | glmark2                       | ✅        | 
 | xonotic                       | ✅        | 
-| openmw                        | ❓        | 
+| openmw                        | ✅        | 
 | steam                         | ❓        | 
