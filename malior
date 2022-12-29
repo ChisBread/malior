@@ -9,11 +9,14 @@ Usage:
         'malior xonotic' for start xonotic
         'malior update' for update malior image
 Command:
-    help            This usage guide
-    update          Update malior image
-    recreate        Recreate malior runtime container
-    remove          Remove malior runtime container
-    install         Install games
+    help             This usage guide
+    update           Update malior image
+    recreate         Recreate malior runtime container
+    distroy          Stop and remove malior runtime container
+    pause            Pause(docker stop) malior runtime container
+    resume           Resume(docker start) malior runtime container
+    install|update   Install or update game
+    remove           Remove game
 EOF
 }
 function install() {
@@ -28,7 +31,19 @@ MALIOR_RUNNING=1
 if [ "`sudo docker ps|grep malior-runtime-$USER`" == "" ]; then
     MALIOR_RUNNING=0
 fi
-
+function runtime_start() {
+    sudo docker run -it --init -d --restart unless-stopped --name=malior-runtime-$USER --privileged=true \
+            -e TZ=${TZ} -e LANG=${ALNG} \
+            -e WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-0} \
+            -e XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/`id -u`} \
+            -e DISPLAY=${DISPLAY:-":0"} \
+            -v /dev/mali0:/dev/mali0 -v /dev/dri:/dev/dri \
+            -v /tmp/.X11-unix:/tmp/.X11-unix \
+            -v ${XDG_RUNTIME_DIR:-/run/user/`id -u`}:${XDG_RUNTIME_DIR:-/run/user/`id -u`} \
+            -v ${HOME}/.config/malior:/home/player/.config/malior \
+            -v ${HOME}/.local/malior:/home/player/.local/malior \
+            chisbread/rk3588-gaming:${MALIOR_TAG:-base} bash
+}
 # process the first parametre only
 case $1 in
     help)
@@ -51,27 +66,37 @@ case $1 in
         shift
         ;;
     remove)
+        echo 'unimplemented command'
+        exit -1
+        ;;
+    distroy)
         if [ $MALIOR_RUNNING -eq 1 ]; then
             sudo docker rm -f malior-runtime-$USER
         fi
         exit
         ;;
+    pause)
+        sudo docker stop malior-runtime-$USER
+        exit
+        ;;
+    resume)
+        sudo docker start malior-runtime-$USER
+        exit
+        ;;
     install)
+        if [ $MALIOR_RUNNING -eq 0 ]; then
+            runtime_start
+            MALIOR_RUNNING=1
+        fi
         install $2
         exit
         ;;
 esac
 if [ $MALIOR_RUNNING -eq 0 ]; then
-    sudo docker run -it --init -d --restart unless-stopped --name=malior-runtime-$USER --privileged=true \
-        -e WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-0} \
-        -e XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/`id -u`} \
-        -e DISPLAY=${DISPLAY:-":0"} \
-        -v /dev/mali0:/dev/mali0 -v /dev/dri:/dev/dri \
-        -v /tmp/.X11-unix:/tmp/.X11-unix \
-        -v ${XDG_RUNTIME_DIR:-/run/user/`id -u`}:${XDG_RUNTIME_DIR:-/run/user/`id -u`} \
-        -v ${HOME}/.config/malior:/home/player/.config/malior
-        -v ${HOME}/.local/malior:/home/player/.local/malior
-        chisbread/rk3588-gaming:${MALIOR_TAG:-base} bash
+    runtime_start
     exit
 fi
-sudo docker exec -it malior-runtime-$USER bash -c "source /home/player/.config/malior/envs.sh ; $@"
+sudo docker exec -it malior-runtime-$USER bash -c "source /home/player/.config/malior/envs.sh ; $*"
+if [ "$?" != 0 ]; then
+    echo "Doesn't look good? Try reinstalling 'malior install \${THE_GAME}'"
+fi
