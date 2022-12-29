@@ -1,13 +1,77 @@
 #!/bin/env bash
 # set -ex
+function help() {
+    cat <<EOF
+Usage: 
+    $(basename $0) [command] <game-application> <args>
+    e.g. 
+        'malior install xonotic' for start xonotic
+        'malior xonotic' for start xonotic
+        'malior update' for update malior image
+Command:
+    help            This usage guide
+    update          Update malior image
+    recreate        Recreate malior runtime container
+    remove          Remove malior runtime container
+    install         Install games
+EOF
+}
+function install() {
+    wget -O - https://github.com/ChisBread/malior/raw/main/docker/$1-install.sh | bash
+}
+source ~/.config/malior/envs.sh 2>&1 >/dev/null || true
 # TODO: stricter permissions
 sudo chmod 666 /dev/mali0 
 sudo chmod 666 /dev/dri/*
-sudo docker run -it --init ${MALIOR_DOPT_RM:---rm} --name=${MALIOR_DOPT_NAME:-malior} --privileged=true \
-    -e WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-0} \
-    -e XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/1000} \
-    -e DISPLAY=${DISPLAY:-":0"} \
-    -v /dev/mali0:/dev/mali0 -v /dev/dri:/dev/dri \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v /run/user:/run/user \
-    chisbread/rk3588-gaming:${MALIOR_EXEC_GAME:-base} $@
+
+MALIOR_RUNNING=1
+if [ "`sudo docker ps|grep malior-runtime-$USER`" == "" ]; then
+    MALIOR_RUNNING=0
+fi
+
+# process the first parametre only
+case $1 in
+    help)
+        help
+        exit
+        ;;
+    update)
+        if [ $MALIOR_RUNNING -eq 1 ]; then
+            sudo docker rm -f malior-runtime-$USER
+        fi
+        sudo docker pull chisbread/rk3588-gaming:${MALIOR_TAG:-base}
+        MALIOR_RUNNING=0
+        shift
+        ;;
+    recreate)
+        if [ $MALIOR_RUNNING -eq 1 ]; then
+            sudo docker rm -f malior-runtime-$USER
+        fi
+        MALIOR_RUNNING=0
+        shift
+        ;;
+    remove)
+        if [ $MALIOR_RUNNING -eq 1 ]; then
+            sudo docker rm -f malior-runtime-$USER
+        fi
+        exit
+        ;;
+    install)
+        install $2
+        exit
+        ;;
+esac
+if [ $MALIOR_RUNNING -eq 0 ]; then
+    sudo docker run -it --init -d --restart unless-stopped --name=malior-runtime-$USER --privileged=true \
+        -e WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-0} \
+        -e XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/`id -u`} \
+        -e DISPLAY=${DISPLAY:-":0"} \
+        -v /dev/mali0:/dev/mali0 -v /dev/dri:/dev/dri \
+        -v /tmp/.X11-unix:/tmp/.X11-unix \
+        -v ${XDG_RUNTIME_DIR:-/run/user/`id -u`}:${XDG_RUNTIME_DIR:-/run/user/`id -u`} \
+        -v ${HOME}/.config/malior:/home/player/.config/malior
+        -v ${HOME}/.local/malior:/home/player/.local/malior
+        chisbread/rk3588-gaming:${MALIOR_TAG:-base} bash
+    exit
+fi
+sudo docker exec -it malior-runtime-$USER bash -c "source /home/player/.config/malior/envs.sh ; $@"

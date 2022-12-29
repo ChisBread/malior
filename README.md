@@ -9,7 +9,7 @@
 - Install Docker (required)
 - Install the 'malior' command
 ```bash
-wget -O - https://github.com/ChisBread/malior/raw/main/install.sh | sudo bash
+wget -O - https://github.com/ChisBread/malior/raw/main/install.sh | bash
 ```
 - X11 test
 ```bash

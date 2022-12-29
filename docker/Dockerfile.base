@@ -1,5 +1,5 @@
 FROM ubuntu:22.04
-RUN sed -i s@/ports.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list \
+RUN sed -i s@/ports.ubuntu.com/@/mirrors.tuna.tsinghua.edu.cn/@g /etc/apt/sources.list \
     && apt-get update && apt-get install -y software-properties-common \
     && add-apt-repository ppa:liujianfeng1994/panfork-mesa \
     && sed -i -e "s@http.*://ppa.launchpadcontent.net@https://launchpad.proxy.ustclug.org@g" /etc/apt/sources.list.d/* \
@@ -13,3 +13,4 @@ RUN sed -i s@/ports.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list \
 
 RUN groupadd -o -g 1000 player && useradd -g player -s /bin/bash -u 1000 -m player
 USER player
+ENV PAN_MESA_DEBUG=gofaster
