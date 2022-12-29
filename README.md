@@ -3,6 +3,7 @@
 - In early development and assume SOC is RK3588(S)
 - Test environment: 
   - Linux Distribution: Ubuntu 22.04(Jammy)
+  - Desktop: Gnome with Wayland
   - SOC: RK3588S
 
 ## Quick Start
