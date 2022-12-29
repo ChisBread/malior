@@ -44,7 +44,7 @@ function runtime_start() {
             -v ${HOME}/.local/malior:/home/player/.local/malior \
             chisbread/rk3588-gaming:${MALIOR_TAG:-base} bash
     sudo docker exec -it --user=root malior-runtime-$USER \
-        bash -c "chown player:player ${XDG_RUNTIME_DIR:-/run/user/`id -u`} \$HOME/{.config,.local} && chmod 0700 ${XDG_RUNTIME_DIR:-/run/user/`id -u`}"
+        bash -c "chown player:player ${XDG_RUNTIME_DIR:-/run/user/`id -u`} /home/player/{.config,.local} && chmod 0700 ${XDG_RUNTIME_DIR:-/run/user/`id -u`}"
 }
 # process the first parametre only
 case $1 in
