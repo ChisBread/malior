@@ -10,5 +10,6 @@ echo "Initialize configuration directory.."
 cat > ~/.config/malior/envs.sh <<EOF
 export XONOTIC_DIR=~/.local/malior/xonotic
 export PATH=~/.local/malior/bin:/usr/games:\$PATH
+export USER=\$(whoami)
 EOF
 echo "Done."
