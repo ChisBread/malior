@@ -37,23 +37,24 @@ if [ -t 0 ] && [ -t 1 ]; then
 fi
 function runtime_start() {
     sudo docker run $DOCKER_OPTS --init -d --restart unless-stopped --name=malior-runtime-$USER --privileged=true \
-            -e TZ=${TZ} -e LANG=${ALNG} \
+            -e TZ=${TZ:-$(cat /etc/timezone)} -e LANG=${LANG} -e LANGUAGE=${LANGUAGE} -e LC_ALL=${LC_ALL}  \
             -e WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-0} \
-            -e XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/`id -u`} \
+            -e XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/$UID} \
             -e DISPLAY=${DISPLAY:-":0"} \
-            -e PULSE_SERVER=unix:${XDG_RUNTIME_DIR:-/run/user/`id -u`}/pulse/native \
-            $(getent group |grep bread | cut -d: -f3| awk '{print "--group-add "$1}') \
+            -e PULSE_SERVER=unix:${XDG_RUNTIME_DIR:-/run/user/$UID}/pulse/native \
+            $(getent group |grep bread | cut -d: -f3|grep -v -P '^(111|121)$'| awk '{print "--group-add "$1}') \
+            $(ls -v /dev|grep -P 'mali0|dri|udev|snd|shm'|awk '{print "-v /dev/"$1":/dev/"$1}') \
             -v /etc/machine-id:/etc/machine-id \
-            -v /dev:/dev \
-            -v ${HOME}/.pulse:/home/player/.pulse \
+            -v /etc/pulse:/etc/pulse -v /etc/alsa:/etc/alsa \
+            -v /usr/share/alsa:/usr/share/alsa \
             -v ${HOME}/.config/pulse:/home/player/.config/pulse \
             -v /tmp/.X11-unix:/tmp/.X11-unix \
-            -v ${XDG_RUNTIME_DIR:-/run/user/`id -u`}:${XDG_RUNTIME_DIR:-/run/user/`id -u`} \
+            -v ${XDG_RUNTIME_DIR:-/run/user/$UID}:${XDG_RUNTIME_DIR:-/run/user/$UID} \
             -v ${HOME}/.config/malior:/home/player/.config/malior \
             -v ${HOME}/.local/malior:/home/player/.local/malior \
             chisbread/rk3588-gaming:${MALIOR_TAG:-base} bash
     sudo docker exec $DOCKER_OPTS --user=root malior-runtime-$USER \
-        bash -c "chown player:player ${XDG_RUNTIME_DIR:-/run/user/`id -u`} /home/player/{.config,.local} && chmod 0700 ${XDG_RUNTIME_DIR:-/run/user/`id -u`}"
+        bash -c "chown player:player ${XDG_RUNTIME_DIR:-/run/user/$UID} /home/player/{.config,.local} && chmod 0700 ${XDG_RUNTIME_DIR:-/run/user/$UID}"
     sudo docker exec $DOCKER_OPTS malior-runtime-$USER \
         bash -c "ln -sf /home/player/.local/malior/share /home/player/.local/share"
 }
