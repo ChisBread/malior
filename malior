@@ -22,7 +22,9 @@ Command:
 EOF
 }
 function install() {
-    wget -O - https://github.com/ChisBread/malior/raw/main/docker/$1-install.sh | bash
+    wget -O - https://github.com/ChisBread/malior/raw/main/docker/$1-install.sh > /tmp/$1-install.sh 
+    bash /tmp/$1-install.sh
+    rm /tmp/$1-install.sh
 }
 MALIOR_RUNNING=1
 if [ "`sudo docker ps|grep malior-runtime-$USER`" == "" ]; then

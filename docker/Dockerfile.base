@@ -5,7 +5,7 @@ RUN sed -i s@/ports.ubuntu.com/@/mirrors.tuna.tsinghua.edu.cn/@g /etc/apt/source
     && sed -i -e "s@http.*://ppa.launchpadcontent.net@https://launchpad.proxy.ustclug.org@g" /etc/apt/sources.list.d/* \
     && dpkg --add-architecture armhf\
     && apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y locales \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y locales wget curl vim \
         libegl-mesa0:armhf libgbm1:armhf libgl1-mesa-dri:armhf libglapi-mesa:armhf libglx-mesa0:armhf \
         libegl-mesa0 libgbm1 libgl1-mesa-dri libglapi-mesa libglx-mesa0 mesa-utils \
         autoconf automake build-essential curl git libtool libgmp-dev libjpeg-turbo8-dev libsdl2-dev libxpm-dev xserver-xorg-dev zlib1g-dev unzip zip \
