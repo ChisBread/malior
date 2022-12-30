@@ -6,8 +6,8 @@ RUN sed -i s@/ports.ubuntu.com/@/mirrors.tuna.tsinghua.edu.cn/@g /etc/apt/source
     && dpkg --add-architecture armhf\
     && apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y locales wget curl vim \
-        libegl-mesa0:armhf libgbm1:armhf libgl1-mesa-dri:armhf libglapi-mesa:armhf libglx-mesa0:armhf \
-        libegl-mesa0 libgbm1 libgl1-mesa-dri libglapi-mesa libglx-mesa0 mesa-utils \
+        libegl-mesa0:armhf libegl1-mesa:armhf libgbm1:armhf libgl1-mesa-dri:armhf libgl1-mesa-glx:armhf libglapi-mesa:armhf libgles2-mesa:armhf libglx-mesa0:armhf libosmesa6:armhf libwayland-egl1-mesa:armhf mesa-va-drivers:armhf \
+        libegl-mesa0 libegl1-mesa libgbm1 libgl1-mesa-dri libgl1-mesa-glx libglapi-mesa libgles2-mesa libglx-mesa0 libosmesa6 libwayland-egl1-mesa mesa-va-drivers \
         autoconf automake build-essential curl git libtool libgmp-dev libjpeg-turbo8-dev libsdl2-dev libxpm-dev xserver-xorg-dev zlib1g-dev unzip zip \
         libosmesa6-dev freeglut3-dev libpulse0 libasound2 libasound2-plugins pulseaudio-utils libvorbisfile3 libvorbisenc2 libvorbis0a \
         glmark2 glmark2-wayland glmark2-es2 glmark2-es2-wayland \
