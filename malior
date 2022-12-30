@@ -59,9 +59,11 @@ function runtime_start() {
             -v ${HOME}/.config/malior:/home/player/.config/malior \
             -v ${HOME}/.local/malior:/home/player/.local/malior \
             chisbread/rk3588-gaming:${MALIOR_TAG:-base}
-    [ "$?" != "0" ] && exit -1
-    sleep 1 # TODO wait and check
-    sudo docker exec $DOCKER_OPTS --user=root malior-runtime-$USER \
+    DOCKER_RUN_STATUS=$?
+    # wait for some initialization TODO: active inspection
+    [ "$DOCKER_RUN_STATUS" == "0" ] && sleep 1.5
+    # Create or map directory
+    [ "$DOCKER_RUN_STATUS" == "0" ] && sudo docker exec $DOCKER_OPTS --user=root malior-runtime-$USER \
         bash -c \
         "(rm -rf /tmp/.X11-unix || true) \
         && (mkdir -p /run/user || true) && (chmod 755 /run || true) && (chmod 755 /run/user || true) \
@@ -72,15 +74,16 @@ function runtime_start() {
             /home/player/{.config,.local}/malior /home/player/.config/pulse \
         && chmod 0700 ${XDG_RUNTIME_DIR:-/run/user/$UID}"
         
-    sudo docker exec $DOCKER_OPTS --user=player malior-runtime-$USER \
+    [ "$DOCKER_RUN_STATUS" == "0" ] && sudo docker exec $DOCKER_OPTS --user=player malior-runtime-$USER \
         bash -c "ln -sf /home/player/.local/malior/share /home/player/.local/share"
-
+    # Restoring possibly wrong permissions
     sudo chown $USER:$USER ${XDG_RUNTIME_DIR:-/run/user/$UID} \
         ${HOME}/{.config,.local} \
         ${HOME}/{.config,.local}/malior \
         ${HOME}/.config/pulse
-    sudo chmod 0700 ${XDG_RUNTIME_DIR:-/run/user/$UID}
+    sudo chmod 700 ${XDG_RUNTIME_DIR:-/run/user/$UID}
     sudo chmod 777 /tmp/.X11-unix
+    [ "$DOCKER_RUN_STATUS" != "0" ] && exit -1
 }
 # process the first parametre only
 case $1 in
