@@ -35,14 +35,18 @@ DOCKER_OPTS='-i'
 if [ -t 0 ] && [ -t 1 ]; then
     DOCKER_OPTS=$DOCKER_OPTS" -t"
 fi
-
 function runtime_start() {
     sudo docker run $DOCKER_OPTS --init -d --restart unless-stopped --name=malior-runtime-$USER --privileged=true \
             -e TZ=${TZ} -e LANG=${ALNG} \
             -e WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-0} \
             -e XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/`id -u`} \
             -e DISPLAY=${DISPLAY:-":0"} \
-            -v /dev/mali0:/dev/mali0 -v /dev/dri:/dev/dri \
+            -e PULSE_SERVER=unix:${XDG_RUNTIME_DIR:-/run/user/`id -u`}/pulse/native \
+            $(getent group |grep bread | cut -d: -f3| awk '{print "--group-add "$1}') \
+            -v /etc/machine-id:/etc/machine-id \
+            -v /dev:/dev \
+            -v ${HOME}/.pulse:/home/player/.pulse \
+            -v ${HOME}/.config/pulse:/home/player/.config/pulse \
             -v /tmp/.X11-unix:/tmp/.X11-unix \
             -v ${XDG_RUNTIME_DIR:-/run/user/`id -u`}:${XDG_RUNTIME_DIR:-/run/user/`id -u`} \
             -v ${HOME}/.config/malior:/home/player/.config/malior \
