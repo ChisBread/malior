@@ -35,7 +35,8 @@ if [ -t 0 ] && [ -t 1 ]; then
     DOCKER_OPTS=$DOCKER_OPTS" -t"
 fi
 function runtime_start() {
-    sudo docker run $DOCKER_OPTS --init -d --restart unless-stopped --name=malior-runtime-$USER --privileged=true \
+    sudo docker run $DOCKER_OPTS -d --restart unless-stopped --name=malior-runtime-$USER --privileged=true \
+            --cap-add SYS_ADMIN --security-opt seccomp=unconfined --cgroup-parent=docker.slice --cgroupns private \
             -e TZ=${TZ:-$(cat /etc/timezone)} -e LANG=${LANG} -e LANGUAGE=${LANGUAGE} -e LC_ALL=${LC_ALL}  \
             -e WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-0} \
             -e XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/$UID} \
@@ -51,10 +52,14 @@ function runtime_start() {
             -v ${XDG_RUNTIME_DIR:-/run/user/$UID}:${XDG_RUNTIME_DIR:-/run/user/$UID} \
             -v ${HOME}/.config/malior:/home/player/.config/malior \
             -v ${HOME}/.local/malior:/home/player/.local/malior \
-            chisbread/rk3588-gaming:${MALIOR_TAG:-base} bash
+            --mount type=bind,source=/sys/fs/fuse,target=/sys/fs/fuse \
+            --mount type=tmpfs,destination=/tmp \
+            --mount type=tmpfs,destination=/run \
+            --mount type=tmpfs,destination=/run/lock \
+            chisbread/rk3588-gaming:${MALIOR_TAG:-base} 
     sudo docker exec $DOCKER_OPTS --user=root malior-runtime-$USER \
         bash -c "chown player:player ${XDG_RUNTIME_DIR:-/run/user/$UID} /home/player/{.config,.local} && chmod 0700 ${XDG_RUNTIME_DIR:-/run/user/$UID}"
-    sudo docker exec $DOCKER_OPTS malior-runtime-$USER \
+    sudo docker exec $DOCKER_OPTS --user=player malior-runtime-$USER \
         bash -c "ln -sf /home/player/.local/malior/share /home/player/.local/share"
 }
 # process the first parametre only
@@ -109,4 +114,4 @@ if [ $MALIOR_RUNNING -eq 0 ]; then
     runtime_start
     exit
 fi
-sudo docker exec $DOCKER_OPTS ${MALIOR_EXEC_OPT:-} malior-runtime-$USER bash -c "source /home/player/.config/malior/envs.sh ; $*"
+sudo docker exec $DOCKER_OPTS --user=${MALIOR_EXEC_USER:-player} malior-runtime-$USER bash -c "source /home/player/.config/malior/envs.sh ; $*"
