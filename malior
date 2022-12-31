@@ -44,18 +44,21 @@ function runtime_start() {
             -e XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/$UID} \
             -e DISPLAY=${DISPLAY:-":0"} \
             -e PULSE_SERVER=unix:${XDG_RUNTIME_DIR:-/run/user/$UID}/pulse/native \
+            -e DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user/$UID/bus} \
             $(getent group | grep -P "audio|video|users|input|bluetooth|(^$USER)" | cut -d: -f3|grep -v -P '^(111|121)$'| awk '{print "--group-add "$1}') \
             --mount type=bind,source=/sys/fs/fuse,target=/sys/fs/fuse \
             --mount type=tmpfs,destination=/tmp \
             --mount type=tmpfs,destination=/run \
             --mount type=tmpfs,destination=/run/lock \
             $(ls -v /dev|grep -P 'mali0|dri|udev|snd|shm'|awk '{print "-v /dev/"$1":/dev/"$1}') \
-            -v /etc/machine-id:/etc/machine-id \
-            -v /etc/pulse:/etc/pulse -v /etc/alsa:/etc/alsa \
-            -v /usr/share/alsa:/usr/share/alsa \
-            -v ${HOME}/.config/pulse:/home/player/.config/pulse \
-            -v /tmp/.X11-unix:/hostfs/tmp/.X11-unix \
-            -v ${XDG_RUNTIME_DIR:-/run/user/$UID}:/hostfs${XDG_RUNTIME_DIR:-/run/user/$UID} \
+            $( [ -e /etc/machine-id ] && echo '-v /etc/machine-id:/etc/machine-id' ) \
+            $( [ -e /etc/pulse ] && echo '-v /etc/pulse:/etc/pulse' ) \
+            $( [ -e /etc/alsa ] && echo '-v /etc/alsa:/etc/alsa' ) \
+            $( [ -e /usr/share/alsa ] && echo '-v /usr/share/alsa:/usr/share/alsa' ) \
+            $( [ -e ${HOME}/.config/pulse ] && echo "-v ${HOME}/.config/pulse:/home/player/.config/pulse" ) \
+            $( [ -e /tmp/.X11-unix ] && echo '-v /tmp/.X11-unix:/hostfs/tmp/.X11-unix' ) \
+            $( [ -e ${XDG_RUNTIME_DIR:-/run/user/$UID} ] && echo "-v ${XDG_RUNTIME_DIR:-/run/user/$UID}:/hostfs${XDG_RUNTIME_DIR:-/run/user/$UID}" ) \
+            $( [ -e /var/run/dbus/system_bus_socket ] && echo '-v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket') \
             -v ${HOME}/.config/malior:/home/player/.config/malior \
             -v ${HOME}/.local/malior:/home/player/.local/malior \
             -v ${HOME}/.local/malior/share:/home/player/.local/share \
