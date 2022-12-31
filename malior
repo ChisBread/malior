@@ -77,12 +77,13 @@ function runtime_start() {
                 /home/player/{.config,.local}/malior /home/player/.config/pulse ; \
         echo 'override XDG_RUNTIME_DIR permission' && \
             chmod 700 ${XDG_RUNTIME_DIR:-/run/user/$UID} ; \
-        echo 'add _apt to player group' && \
-            usermod -a -G player _apt ; \
+        echo 'add _apt to player|root group' && \
+            usermod -a -G player _apt && usermod -a -G root _apt ; \
         echo 'link hostfs /var/lib/apt/lists' && \
             mkdir -p /home/player/.local/malior/var/lib/apt \
             && chmod 775 /home/player/.local/malior/var/lib/apt \
                 /home/player/.local/malior/var/lib \
+                /home/player/.local/malior/var \
                 /home/player/.local/malior \
                 /home/player/.local \
                 /home/player \
