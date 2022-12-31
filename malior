@@ -78,7 +78,8 @@ function runtime_start() {
         echo 'override XDG_RUNTIME_DIR permission' && \
             chmod 700 ${XDG_RUNTIME_DIR:-/run/user/$UID} ; \
         echo 'add _apt to player|root group' && \
-            usermod -a -G player _apt && usermod -a -G root _apt ; \
+            usermod -a -G player _apt && usermod -a -G root _apt \
+            && rm /etc/apt/apt.conf.d/docker-* ; \
         echo 'link hostfs /var/lib/apt/lists' && \
             mkdir -p /home/player/.local/malior/var/lib/apt \
             && chmod 775 /home/player/.local/malior/var/lib/apt \
@@ -89,12 +90,14 @@ function runtime_start() {
                 /home/player \
             && [ -d /var/lib/apt/lists ] && [ ! -d /home/player/.local/malior/var/lib/apt/lists ] \
             && mv /var/lib/apt/lists /home/player/.local/malior/var/lib/apt ; \
+            [ -d /var/lib/apt/lists ] && rm -rf /var/lib/apt/lists ; \
             ln -sf /home/player/.local/malior/var/lib/apt/lists /var/lib/apt/lists ; \
         echo 'link hostfs /var/cache/apt' && \
             mkdir -p /home/player/.local/malior/var/cache \
             && chmod 775 /home/player/.local/malior/var/cache \
             && [ -d /var/cache/apt ] && [ ! -d /home/player/.local/malior/var/cache/apt ] \
             && mv /var/cache/apt /home/player/.local/malior/var/cache ; \
+            [ -d /var/cache/apt ] && rm -rf /var/cache/apt ; \
             ln -sf /home/player/.local/malior/var/cache/apt /var/cache/apt ; \
         "
         
