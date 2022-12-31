@@ -1,6 +1,6 @@
 #/bin/bash
 source $HOME/.config/malior/envs.sh 2>&1 >/dev/null || true
-if [ -e $HOME/.local/malior/steam/bin/steam ]; then
+if [ ! -e $HOME/.local/malior/steam/bin/steam ]; then
     # create necessary directories
     mkdir -p $HOME/.local/malior/steam
     mkdir -p $HOME/.local/malior/steam/tmp
