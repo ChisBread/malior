@@ -170,6 +170,5 @@ case $1 in
 esac
 if [ $MALIOR_RUNNING -eq 0 ]; then
     runtime_start
-    exit
 fi
 sudo docker exec $DOCKER_OPTS --user=${MALIOR_EXEC_USER:-player} malior-runtime-$USER bash -c "source /home/player/.config/malior/envs.sh ; $*"
