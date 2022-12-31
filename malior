@@ -15,8 +15,8 @@ Command:
     update           Update malior image
     recreate         Recreate malior runtime container
     destroy          Stop and remove malior runtime container
-    pause            Pause(docker stop) malior runtime container
-    resume           Resume(docker start) malior runtime container
+    pause|stop       Pause(docker stop) malior runtime container
+    resume|start     Resume(docker start) malior runtime container
     install|update   Install or update game
     remove           Remove game
 EOF
@@ -151,11 +151,11 @@ case $1 in
         fi
         exit
         ;;
-    pause)
+    pause|stop)
         sudo docker stop malior-runtime-$USER
         exit
         ;;
-    resume)
+    resume|start)
         sudo docker start malior-runtime-$USER
         exit
         ;;
