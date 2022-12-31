@@ -20,7 +20,7 @@ echo "#!/bin/bash
 export STEAMOS=1
 export STEAM_RUNTIME=1
 export DBUS_FATAL_WARNINGS=0
-\$HOME/.local/malior/steam/bin/steam -noreactlogin steam://open/minigameslist $@" > $HOME/.local/malior/bin/steam
+\$HOME/.local/malior/steam/bin/steam -noreactlogin steam://open/minigameslist \$@" > $HOME/.local/malior/bin/steam
 chmod +x $HOME/.local/malior/bin/steam
 # update package lists with the newly added arch
 MALIOR_EXEC_USER=root malior 'apt-get update && apt-get install -y \
