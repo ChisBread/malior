@@ -24,7 +24,7 @@ export DBUS_FATAL_WARNINGS=0
 chmod +x $HOME/.local/malior/bin/steam
 # update package lists with the newly added arch
 MALIOR_EXEC_USER=root malior 'apt-get update && apt-get install -y \
-    dbus-x11 dbus-x11:armhf fonts-wqy-* libnm0:armhf libudev0:armhf libudev1:armhf \
+    dbus-x11 fonts-wqy-* libnm0:armhf libudev0:armhf libudev1:armhf \
     libxcb*:armhf libgtk2.0-0:armhf libtcmalloc-minimal4*:armhf zenity:armhf \
     libc6:armhf libncurses5:armhf libsdl2*:armhf libopenal*:armhf libpng*:armhf libfontconfig*:armhf libXcomposite*:armhf libbz2-dev:armhf libXtst*:armhf'
 echo "Don't forget to 'malior install Box86N64' !"
