@@ -18,20 +18,20 @@ wget -O - https://github.com/ChisBread/malior/raw/main/install.sh > /tmp/malior-
 - malior help
 ```
 Usage: 
-    malior [command] <game-application> <args>
+    malior [command] <game|application> <args>
     e.g. 
         'malior install xonotic' for install xonotic
         'malior xonotic' for start xonotic
+        'malior update (malior, xonotic, etc...)' for update something
         'malior update' for update malior image
 Command:
-    help             This usage guide
-    update           Update malior image
-    recreate         Recreate malior runtime container
-    destroy          Stop and remove malior runtime container
-    pause            Pause(docker stop) malior runtime container
-    resume           Resume(docker start) malior runtime container
-    install|update   Install or update game
-    remove           Remove game
+    help                   This usage guide
+    update <game|app>      Update malior image
+    recreate               Recreate malior runtime container
+    destroy                Stop and remove malior runtime container
+    pause|stop             Pause(docker stop) malior runtime container
+    resume|start           Resume(docker start) malior runtime container
+    remove                 Remove game
 ```
 - X11 test
 ```bash

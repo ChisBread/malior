@@ -5,23 +5,24 @@ source ~/.config/malior/envs.sh 2>&1 >/dev/null || true
 function help() {
     cat <<EOF
 Usage: 
-    $(basename $0) [command] <game-application> <args>
+    $(basename $0) [command] <game|application> <args>
     e.g. 
-        'malior install xonotic' for start xonotic
+        'malior install xonotic' for install xonotic
         'malior xonotic' for start xonotic
+        'malior update (malior, xonotic, etc...)' for update something
         'malior update' for update malior image
 Command:
-    help             This usage guide
-    update           Update malior image
-    recreate         Recreate malior runtime container
-    destroy          Stop and remove malior runtime container
-    pause|stop       Pause(docker stop) malior runtime container
-    resume|start     Resume(docker start) malior runtime container
-    install|update   Install or update game
-    remove           Remove game
+    help                   This usage guide
+    update <game|app>      Update malior image
+    recreate               Recreate malior runtime container
+    destroy                Stop and remove malior runtime container
+    pause|stop             Pause(docker stop) malior runtime container
+    resume|start           Resume(docker start) malior runtime container
+    remove                 Remove game
 EOF
 }
 function install() {
+    [ "$1" == "malior" ] && sudo wget https://github.com/ChisBread/malior/raw/main/malior -O /usr/local/bin/malior && exit
     wget -O - https://github.com/ChisBread/malior/raw/main/docker/$1-install.sh > /tmp/$1-install.sh 
     bash /tmp/$1-install.sh
     rm /tmp/$1-install.sh
@@ -121,7 +122,9 @@ function runtime_start() {
     [ "$DOCKER_RUN_STATUS" != "0" ] && exit -1
 }
 # process the first parametre only
-case $1 in
+COMMAND=$1
+[[ "$1" == "update" ]] && [[ "$@" != "update" ]] && COMMAND="install"
+case $COMMAND in
     help)
         help
         exit
@@ -159,7 +162,7 @@ case $1 in
         sudo docker start malior-runtime-$USER
         exit
         ;;
-    install|update)
+    install)
         if [ $MALIOR_RUNNING -eq 0 ]; then
             runtime_start
             MALIOR_RUNNING=1
