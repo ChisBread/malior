@@ -1,7 +1,8 @@
 # Malior [🎮]
 - Containerized game packaging for mali gpu under Linux.
-  - Full audio, graphics support
-  - Linux native games, box86/64 simulation games...
+  - Full audio, graphics support.
+  - Linux native games, box86/64 simulation games, etc.
+  - Support systemd, etc.
 - In early development and assume SOC is RK3588(S)
 - Test environment: 
   - Linux Distribution: Ubuntu 22.04(Jammy)
