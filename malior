@@ -36,34 +36,40 @@ if [ -t 0 ] && [ -t 1 ]; then
 fi
 #[ ! -d /tmp/.X11-unix ]
 function runtime_start() {
-    sudo docker run $DOCKER_OPTS -d --restart=no --name=malior-runtime-$USER --privileged=true \
-            --cap-add SYS_ADMIN --security-opt seccomp=unconfined --cgroup-parent=docker.slice --cgroupns private \
-            --shm-size 512M \
-            -e TZ=${TZ:-$(cat /etc/timezone)} -e LANG=${LANG} -e LANGUAGE=${LANGUAGE} -e LC_ALL=${LC_ALL}  \
-            -e WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-0} \
-            -e XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/$UID} \
-            -e DISPLAY=${DISPLAY:-":0"} \
-            -e PULSE_SERVER=unix:${XDG_RUNTIME_DIR:-/run/user/$UID}/pulse/native \
-            -e DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user/$UID/bus} \
-            $(getent group | grep -P "audio|video|users|input|bluetooth|(^$USER)" | cut -d: -f3|grep -v -P '^(111|121)$'| awk '{print "--group-add "$1}') \
-            --mount type=bind,source=/sys/fs/fuse,target=/sys/fs/fuse \
-            --mount type=tmpfs,destination=/tmp \
-            --mount type=tmpfs,destination=/run \
-            --mount type=tmpfs,destination=/run/lock \
-            $(ls -v /dev|grep -P 'mali0|dri|udev|snd|shm'|awk '{print "-v /dev/"$1":/dev/"$1}') \
-            $( [ -e /etc/machine-id ] && echo '-v /etc/machine-id:/etc/machine-id' ) \
-            $( [ -e /etc/pulse ] && echo '-v /etc/pulse:/etc/pulse' ) \
-            $( [ -e /etc/alsa ] && echo '-v /etc/alsa:/etc/alsa' ) \
-            $( [ -e /usr/share/alsa ] && echo '-v /usr/share/alsa:/usr/share/alsa' ) \
-            $( [ -e ${HOME}/.config/pulse ] && echo "-v ${HOME}/.config/pulse:/home/player/.config/pulse" ) \
-            $( [ -e /tmp/.X11-unix ] && echo '-v /tmp/.X11-unix:/hostfs/tmp/.X11-unix' ) \
-            $( [ -e ${XDG_RUNTIME_DIR:-/run/user/$UID} ] && echo "-v ${XDG_RUNTIME_DIR:-/run/user/$UID}:/hostfs${XDG_RUNTIME_DIR:-/run/user/$UID}" ) \
-            $( [ -e /var/run/dbus/system_bus_socket ] && echo '-v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket') \
-            -v ${HOME}/.config/malior:/home/player/.config/malior \
-            -v ${HOME}/.local/malior:/home/player/.local/malior \
-            -v ${HOME}/.local/malior/share:/home/player/.local/share \
-            chisbread/rk3588-gaming:${MALIOR_TAG:-base}
-    DOCKER_RUN_STATUS=$?
+    DOCKER_RUN_STATUS=0
+    if [ "`sudo docker container ls -a|grep malior-runtime-$USER`" == "" ]; then
+        sudo docker run $DOCKER_OPTS -d --restart=no --name=malior-runtime-$USER --privileged=true \
+                --cap-add SYS_ADMIN --security-opt seccomp=unconfined --cgroup-parent=docker.slice --cgroupns private \
+                --shm-size 512M \
+                -e TZ=${TZ:-$(cat /etc/timezone)} -e LANG=${LANG} -e LANGUAGE=${LANGUAGE} -e LC_ALL=${LC_ALL}  \
+                -e WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-0} \
+                -e XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/$UID} \
+                -e DISPLAY=${DISPLAY:-":0"} \
+                -e PULSE_SERVER=unix:${XDG_RUNTIME_DIR:-/run/user/$UID}/pulse/native \
+                -e DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user/$UID/bus} \
+                $(getent group | grep -P "audio|video|users|input|bluetooth|(^$USER)" | cut -d: -f3|grep -v -P '^(111|121)$'| awk '{print "--group-add "$1}') \
+                --mount type=bind,source=/sys/fs/fuse,target=/sys/fs/fuse \
+                --mount type=tmpfs,destination=/tmp \
+                --mount type=tmpfs,destination=/run \
+                --mount type=tmpfs,destination=/run/lock \
+                $(ls -v /dev|grep -P 'mali0|dri|udev|snd|shm'|awk '{print "-v /dev/"$1":/dev/"$1}') \
+                $( [ -e /etc/machine-id ] && echo '-v /etc/machine-id:/etc/machine-id' ) \
+                $( [ -e /etc/pulse ] && echo '-v /etc/pulse:/etc/pulse' ) \
+                $( [ -e /etc/alsa ] && echo '-v /etc/alsa:/etc/alsa' ) \
+                $( [ -e /usr/share/alsa ] && echo '-v /usr/share/alsa:/usr/share/alsa' ) \
+                $( [ -e ${HOME}/.config/pulse ] && echo "-v ${HOME}/.config/pulse:/home/player/.config/pulse" ) \
+                $( [ -e /tmp/.X11-unix ] && echo '-v /tmp/.X11-unix:/hostfs/tmp/.X11-unix' ) \
+                $( [ -e ${XDG_RUNTIME_DIR:-/run/user/$UID} ] && echo "-v ${XDG_RUNTIME_DIR:-/run/user/$UID}:/hostfs${XDG_RUNTIME_DIR:-/run/user/$UID}" ) \
+                $( [ -e /var/run/dbus/system_bus_socket ] && echo '-v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket') \
+                -v ${HOME}/.config/malior:/home/player/.config/malior \
+                -v ${HOME}/.local/malior:/home/player/.local/malior \
+                -v ${HOME}/.local/malior/share:/home/player/.local/share \
+                chisbread/rk3588-gaming:${MALIOR_TAG:-base}
+        DOCKER_RUN_STATUS=$?
+    else
+        sudo docker start malior-runtime-$USER
+        DOCKER_RUN_STATUS=$?
+    fi 
     # wait for some initialization TODO: active inspection
     [ "$DOCKER_RUN_STATUS" == "0" ] && sleep 1.5
     # Create or map directory
