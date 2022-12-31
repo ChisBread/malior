@@ -1,5 +1,7 @@
 # Malior [🎮]
 - Containerized game packaging for mali gpu under Linux.
+  - Full audio, graphics support
+  - Linux native games, box86/64 simulation games...
 - In early development and assume SOC is RK3588(S)
 - Test environment: 
   - Linux Distribution: Ubuntu 22.04(Jammy)
@@ -51,10 +53,17 @@ mv $HOME/.xonotic $HOME/.config/malior/.xonotic
 # ln -s $HOME/.config/malior/.xonotic $HOME/.xonotic
 malior install xonotic # Will not re-download all content
 ```
-## Tested
+## Application(Game) Compatibility-List
 | Application                   | playable  |
 | ----------------------------- | --------- |
-| glmark2                       | ✅        | 
-| xonotic                       | ✅        | 
-| openmw                        | ✅        | 
-| steam                         | ✅        | 
+| glmark2(gl,es2,x11,wayland)   | ✅        | 
+| xonotic(sdl)                  | ✅        | 
+| openmw                        | ✅(not fully tested) | 
+| steam(box86)                  | ✅        | 
+| L4D2                          | ❌(bootable but not playable) |
+
+## HW Compatibility-List
+
+| Board                         | playable  |
+| ----------------------------- | --------- |
+| Orange Pi 5                   | ✅        | 
