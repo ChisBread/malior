@@ -20,7 +20,7 @@ wget -O - https://github.com/ChisBread/malior/raw/main/install.sh > /tmp/malior-
 Usage: 
     malior [command] <game-application> <args>
     e.g. 
-        'malior install xonotic' for start xonotic
+        'malior install xonotic' for install xonotic
         'malior xonotic' for start xonotic
         'malior update' for update malior image
 Command:
