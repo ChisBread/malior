@@ -44,7 +44,7 @@ function runtime_start() {
             -e XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/$UID} \
             -e DISPLAY=${DISPLAY:-":0"} \
             -e PULSE_SERVER=unix:${XDG_RUNTIME_DIR:-/run/user/$UID}/pulse/native \
-            $(getent group |grep bread | cut -d: -f3|grep -v -P '^(111|121)$'| awk '{print "--group-add "$1}') \
+            $(getent group | grep -P "audio|video|users|input|bluetooth|(^$USER)" | cut -d: -f3|grep -v -P '^(111|121)$'| awk '{print "--group-add "$1}') \
             --mount type=bind,source=/sys/fs/fuse,target=/sys/fs/fuse \
             --mount type=tmpfs,destination=/tmp \
             --mount type=tmpfs,destination=/run \
@@ -64,18 +64,45 @@ function runtime_start() {
     [ "$DOCKER_RUN_STATUS" == "0" ] && sleep 1.5
     # Create or map directory
     [ "$DOCKER_RUN_STATUS" == "0" ] && sudo docker exec $DOCKER_OPTS --user=root malior-runtime-$USER \
-        bash -c \
-        "(rm -rf /tmp/.X11-unix || true) \
-        && (mkdir -p /run/user || true) && (chmod 755 /run || true) && (chmod 755 /run/user || true) \
-        && ln -sf /hostfs/tmp/.X11-unix /tmp/.X11-unix \
-        && rm -rf ${XDG_RUNTIME_DIR:-/run/user/$UID} \
-        && ln -sf /hostfs${XDG_RUNTIME_DIR:-/run/user/$UID} ${XDG_RUNTIME_DIR:-/run/user/$UID} \
-        && chown player:player /home/player/{.config,.local} \
-            /home/player/{.config,.local}/malior /home/player/.config/pulse \
-        && chmod 0700 ${XDG_RUNTIME_DIR:-/run/user/$UID}"
+        bash -c "\
+        echo 'link hostfs /tmp/.X11-unix' && \
+            rm -rf /tmp/.X11-unix ; \
+            ln -sf /hostfs/tmp/.X11-unix /tmp/.X11-unix ; \
+        echo 'link hostfs ${XDG_RUNTIME_DIR:-/run/user/$UID}' && \
+            mkdir -p /run/user && chmod 755 /run/user && chmod 755 /run ; \
+            rm -rf ${XDG_RUNTIME_DIR:-/run/user/$UID} ; \
+            ln -sf /hostfs${XDG_RUNTIME_DIR:-/run/user/$UID} ${XDG_RUNTIME_DIR:-/run/user/$UID} ; \
+        echo 'override player'\"'\"'s permission' && \
+            chown player:player /home/player/{.config,.local} \
+                /home/player/{.config,.local}/malior /home/player/.config/pulse ; \
+        echo 'override XDG_RUNTIME_DIR permission' && \
+            chmod 700 ${XDG_RUNTIME_DIR:-/run/user/$UID} ; \
+        echo 'add _apt to player group' && \
+            usermod -a -G player _apt ; \
+        echo 'link hostfs /var/lib/apt/lists' && \
+            mkdir -p /home/player/.local/malior/var/lib/apt \
+            && chmod 775 /home/player/.local/malior/var/lib/apt \
+                /home/player/.local/malior/var/lib \
+                /home/player/.local/malior \
+                /home/player/.local \
+                /home/player \
+            && [ -d /var/lib/apt/lists ] && [ ! -d /home/player/.local/malior/var/lib/apt/lists ] \
+            && mv /var/lib/apt/lists /home/player/.local/malior/var/lib/apt ; \
+            ln -sf /home/player/.local/malior/var/lib/apt/lists /var/lib/apt/lists ; \
+        echo 'link hostfs /var/cache/apt' && \
+            mkdir -p /home/player/.local/malior/var/cache \
+            && chmod 775 /home/player/.local/malior/var/cache \
+            && [ -d /var/cache/apt ] && [ ! -d /home/player/.local/malior/var/cache/apt ] \
+            && mv /var/cache/apt /home/player/.local/malior/var/cache ; \
+            ln -sf /home/player/.local/malior/var/cache/apt /var/cache/apt ; \
+        "
         
     [ "$DOCKER_RUN_STATUS" == "0" ] && sudo docker exec $DOCKER_OPTS --user=player malior-runtime-$USER \
-        bash -c "ln -sf /home/player/.local/malior/share /home/player/.local/share"
+        bash -c "\
+        echo 'link .local/share' && \
+            rm -rf /home/player/.local/share ; \
+            ln -sf /home/player/.local/malior/share /home/player/.local/share \
+        "
     # Restoring possibly wrong permissions
     sudo chown $USER:$USER ${XDG_RUNTIME_DIR:-/run/user/$UID} \
         ${HOME}/{.config,.local} \
