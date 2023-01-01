@@ -52,7 +52,7 @@ function runtime_start() {
                 --cap-add SYS_ADMIN --security-opt seccomp=unconfined --cgroup-parent=docker.slice --cgroupns private \
                 --shm-size 512M \
                 -e TZ=${TZ:-$(cat /etc/timezone)} -e LANG=${LANG} -e LANGUAGE=${LANGUAGE} -e LC_ALL=${LC_ALL}  \
-                -e CONTAINER=DOCKER \
+                -e CONTAINER=DOCKER -e PAN_MESA_DEBUG= \
                 $( [ -e ${XDG_RUNTIME_DIR:-/run/user/$UID}/${WAYLAND_DISPLAY:-wayland-0} ] \
                     && echo "--env WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-0}" ) \
                 $( [ -e ${XDG_RUNTIME_DIR:-/run/user/$UID} ] \

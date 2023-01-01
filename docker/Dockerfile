@@ -12,7 +12,7 @@ RUN sed -i s@/ports.ubuntu.com/@/mirrors.tuna.tsinghua.edu.cn/@g /etc/apt/source
         libosmesa6-dev freeglut3-dev libpulse0 libasound2 libasound2-plugins pulseaudio-utils libvorbisfile3 libvorbisenc2 libvorbis0a \
         glmark2 glmark2-wayland glmark2-es2 glmark2-es2-wayland \
     && rm -rf /var/lib/apt/lists/* \
-    && locale-gen en_US.UTF-8
+    && locale-gen en_US.UTF-8 && locale-gen zh_CN.UTF-8
 RUN groupadd -o -g 1000 player && useradd -g player -s /bin/bash -u 1000 -m player
 ENV PAN_MESA_DEBUG=gofaster
 ENV container=docker

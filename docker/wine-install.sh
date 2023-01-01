@@ -102,3 +102,5 @@ chmod +x winetricks && mv winetricks /home/player/.local/malior/bin/ \
 else
     echo "[Wine] Skip"
 fi
+
+[ "`malior 'echo $LANG'`" == "zh_CN.UTF-8" ] && echo "tips: 使用中文环境? 'malior winetricks -q fakechinese wenquanyi'"
