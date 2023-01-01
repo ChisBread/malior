@@ -28,4 +28,5 @@ malior-sudo 'apt-get update && apt-get install -y dbus-x11 fonts-wqy-* libnm0:ar
 malior-sudo 'apt-get install -y libxcb*:armhf libgtk2.0-0:armhf libtcmalloc-minimal4*:armhf zenity:armhf '
 malior-sudo 'apt-get install -y libc6:armhf libncurses5:armhf libsdl2*:armhf libopenal*:armhf libpng*:armhf' 
 malior-sudo 'apt-get install -y libfontconfig*:armhf libXcomposite*:armhf libbz2-dev:armhf libXtst*:armhf'
-echo "Don't forget to 'malior install box86N64' !"
+[ "`malior 'whereis box86 | cut -d: -f2'`" == "" ] && echo "malior install box86N64" && malior install box86N64
+

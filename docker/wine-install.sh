@@ -82,7 +82,7 @@ rm -rf libfaudio \
 "
 
 echo "[Wine] Boot wine (make fresh wineprefix in /home/player/.wine )"
-[ "`malior 'whereis box86 | cut -d: -f2'`" == "" ] && malior install box86N64
+[ "`malior 'whereis box86 | cut -d: -f2'`" == "" ] && echo "malior install box86N64" && malior install box86N64
 malior 'wine wineboot'
 
 
