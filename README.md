@@ -33,6 +33,10 @@ Command:
     resume|start           Resume(docker start) malior runtime container
     remove                 Remove game
 ```
+- malior-sudo
+```bash
+malior-sudo 'echo $USER'
+```
 - X11 test
 ```bash
 malior glmark2

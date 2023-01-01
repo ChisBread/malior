@@ -1,6 +1,15 @@
 #!/bin/env bash
 # set -ex
-source ~/.config/malior/envs.sh 2>&1 >/dev/null || true
+MH_BEFORE=${MALIOR_HOME:-$HOME}
+source ${MALIOR_HOME:-$HOME}/.config/malior/envs.sh
+[ ! -z "$MALIOR_HOME" ] && [ "$MH_BEFORE" != "$MALIOR_HOME" ] \
+    && echo "Found new MALIOR_HOME $MH_BEFORE -> $MALIOR_HOME" \
+    && echo "It is recommended to put MALIOR_HOME in .bashrc instead of envs.sh" \
+    && source $MALIOR_HOME/.config/malior/envs.sh
+
+MALIOR_HOME=${MALIOR_HOME:-$HOME}
+MALIOR_PREFIX=${MALIOR_PREFIX:-https://github.com/ChisBread}
+MALIOR_IMAGE=${MALIOR_IMAGE:-chisbread/rk3588-gaming:base}
 
 function help() {
     cat <<EOF
@@ -22,8 +31,8 @@ Command:
 EOF
 }
 function install() {
-    [ "$1" == "malior" ] && sudo wget https://github.com/ChisBread/malior/raw/main/malior -O /usr/local/bin/malior && exit
-    wget -O - https://github.com/ChisBread/malior/raw/main/docker/$1-install.sh > /tmp/$1-install.sh 
+    [ "$1" == "malior" ] && sudo wget $MALIOR_PREFIX/malior/raw/main/malior -O /usr/local/bin/malior && exit
+    wget -O - $MALIOR_PREFIX/malior/raw/main/docker/$1-install.sh > /tmp/$1-install.sh 
     bash /tmp/$1-install.sh
     rm /tmp/$1-install.sh
 }
@@ -39,21 +48,27 @@ fi
 function runtime_start() {
     DOCKER_RUN_STATUS=0
     if [ "`sudo docker container ls -a|grep malior-runtime-$USER`" == "" ]; then
-        sudo docker run $DOCKER_OPTS -d --restart=no --name=malior-runtime-$USER --privileged=true \
+        sudo docker run $DOCKER_OPTS -d --restart=no --name=malior-runtime-$USER --privileged=true --network="host" \
                 --cap-add SYS_ADMIN --security-opt seccomp=unconfined --cgroup-parent=docker.slice --cgroupns private \
                 --shm-size 512M \
                 -e TZ=${TZ:-$(cat /etc/timezone)} -e LANG=${LANG} -e LANGUAGE=${LANGUAGE} -e LC_ALL=${LC_ALL}  \
-                -e WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-0} \
-                -e XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/$UID} \
-                -e DISPLAY=${DISPLAY:-":0"} \
-                -e PULSE_SERVER=unix:${XDG_RUNTIME_DIR:-/run/user/$UID}/pulse/native \
-                -e DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user/$UID/bus} \
+                -e CONTAINER=DOCKER \
+                $( [ -e ${XDG_RUNTIME_DIR:-/run/user/$UID}/${WAYLAND_DISPLAY:-wayland-0} ] \
+                    && echo "--env WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-0}" ) \
+                $( [ -e ${XDG_RUNTIME_DIR:-/run/user/$UID} ] \
+                    && echo "--env XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/$UID}" ) \
+                $( [ -e /tmp/.X11-unix/X$(echo ${DISPLAY:-":0"}|cut -d: -f2) ] \
+                    && echo "--env DISPLAY=${DISPLAY:-":0"}" ) \
+                $( [ -e ${XDG_RUNTIME_DIR:-/run/user/$UID}/pulse/native ] \
+                    && echo "--env PULSE_SERVER=unix:${XDG_RUNTIME_DIR:-/run/user/$UID}/pulse/native" ) \
+                $( [ -e $(echo $DBUS_SESSION_BUS_ADDRESS | cut -d= -f2) ] \
+                    && echo "--env DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user/$UID/bus}") \
                 $(getent group | grep -P "audio|video|users|input|bluetooth|(^$USER)" | cut -d: -f3|grep -v -P '^(111|121)$'| awk '{print "--group-add "$1}') \
                 --mount type=bind,source=/sys/fs/fuse,target=/sys/fs/fuse \
                 --mount type=tmpfs,destination=/tmp \
                 --mount type=tmpfs,destination=/run \
                 --mount type=tmpfs,destination=/run/lock \
-                $(ls -v /dev|grep -P 'mali0|dri|udev|snd|shm'|awk '{print "-v /dev/"$1":/dev/"$1}') \
+                $(ls -v /dev|grep -P 'mali0|kfd|nvidia|vga_arbiter|video|dri|snd|shm'|awk '{print "-v /dev/"$1":/dev/"$1}') \
                 $( [ -e /etc/machine-id ] && echo '-v /etc/machine-id:/etc/machine-id' ) \
                 $( [ -e /etc/pulse ] && echo '-v /etc/pulse:/etc/pulse' ) \
                 $( [ -e /etc/alsa ] && echo '-v /etc/alsa:/etc/alsa' ) \
@@ -62,64 +77,81 @@ function runtime_start() {
                 $( [ -e /tmp/.X11-unix ] && echo '-v /tmp/.X11-unix:/hostfs/tmp/.X11-unix' ) \
                 $( [ -e ${XDG_RUNTIME_DIR:-/run/user/$UID} ] && echo "-v ${XDG_RUNTIME_DIR:-/run/user/$UID}:/hostfs${XDG_RUNTIME_DIR:-/run/user/$UID}" ) \
                 $( [ -e /var/run/dbus/system_bus_socket ] && echo '-v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket') \
-                -v ${HOME}/.config/malior:/home/player/.config/malior \
-                -v ${HOME}/.local/malior:/home/player/.local/malior \
-                -v ${HOME}/.local/malior/share:/home/player/.local/share \
-                chisbread/rk3588-gaming:${MALIOR_TAG:-base}
+                -v $MALIOR_HOME/.config/malior:/home/player/.config/malior \
+                -v $MALIOR_HOME/.local/malior:/home/player/.local/malior \
+                -v $MALIOR_HOME/.local/malior/share:/home/player/.local/share \
+                $MALIOR_IMAGE
         DOCKER_RUN_STATUS=$?
     else
         sudo docker start malior-runtime-$USER
         DOCKER_RUN_STATUS=$?
     fi 
-    # wait for some initialization TODO: active inspection
-    [ "$DOCKER_RUN_STATUS" == "0" ] && sleep 1.5
-    # Create or map directory
-    [ "$DOCKER_RUN_STATUS" == "0" ] && sudo docker exec $DOCKER_OPTS --user=root malior-runtime-$USER \
-        bash -c "\
-        echo 'link hostfs /tmp/.X11-unix' && \
-            rm -rf /tmp/.X11-unix ; \
-            ln -sf /hostfs/tmp/.X11-unix /tmp/.X11-unix ; \
-        echo 'link hostfs ${XDG_RUNTIME_DIR:-/run/user/$UID}' && \
-            mkdir -p /run/user && chmod 755 /run/user && chmod 755 /run ; \
-            rm -rf ${XDG_RUNTIME_DIR:-/run/user/$UID} ; \
-            ln -sf /hostfs${XDG_RUNTIME_DIR:-/run/user/$UID} ${XDG_RUNTIME_DIR:-/run/user/$UID} ; \
-        echo 'override player'\"'\"'s permission' && \
-            chown player:player /home/player/{.config,.local} \
-                /home/player/{.config,.local}/malior /home/player/.config/pulse ; \
-        echo 'override XDG_RUNTIME_DIR permission' && \
-            chmod 700 ${XDG_RUNTIME_DIR:-/run/user/$UID} ; \
-        echo 'add _apt to player|root group' && \
-            usermod -a -G player _apt && usermod -a -G root _apt \
-            && rm /etc/apt/apt.conf.d/docker-* ; \
-        echo 'link hostfs /var/lib/apt/lists' && \
-            mkdir -p /home/player/.local/malior/var/lib/apt \
-            && chmod 775 /home/player/.local/malior/var/lib/apt \
-                /home/player/.local/malior/var/lib \
-                /home/player/.local/malior/var \
-                /home/player/.local/malior \
-                /home/player/.local \
-                /home/player \
-            && [ -d /var/lib/apt/lists ] && [ ! -d /home/player/.local/malior/var/lib/apt/lists ] \
-            && mv /var/lib/apt/lists /home/player/.local/malior/var/lib/apt ; \
-            [ -d /var/lib/apt/lists ] && rm -rf /var/lib/apt/lists ; \
-            ln -sf /home/player/.local/malior/var/lib/apt/lists /var/lib/apt/lists ; \
-        echo 'link hostfs /var/cache/apt' && \
-            mkdir -p /home/player/.local/malior/var/cache \
-            && chmod 775 /home/player/.local/malior/var/cache \
-            && [ -d /var/cache/apt ] && [ ! -d /home/player/.local/malior/var/cache/apt ] \
-            && mv /var/cache/apt /home/player/.local/malior/var/cache ; \
-            [ -d /var/cache/apt ] && rm -rf /var/cache/apt ; \
-            ln -sf /home/player/.local/malior/var/cache/apt /var/cache/apt ; \
-        "
+
+    
+    if [ "$DOCKER_RUN_STATUS" == "0" ]; then
+        # Wait for some initialization
+        LOOP_CNT=0
+        while :
+        do
+            LOOP_CNT=$(( $LOOP_CNT + 1 ))
+            if [ $LOOP_CNT -eq 100 ]; then
+                sudo docker rm -f malior-runtime-$USER
+                exit 1
+            fi
+            sudo docker exec $DOCKER_OPTS --user=root malior-runtime-$USER \
+            bash -c '[ -e /tmp/.X11-unix ] && echo "/tmp/.X11-unix has been created"'
+            [ "$?" == "0" ] && echo "    checked $LOOP_CNT times" && break
+            sleep 0.05
+        done
+        # Initialize soft links and permissions
+        sudo docker exec $DOCKER_OPTS --user=root malior-runtime-$USER \
+            bash -c "\
+            echo 'change player'\"'\"'s GID:UID to ${MALIOR_UID:-$UID}:${MALIOR_GID:-$UID}' ; \
+            usermod -o -u ${MALIOR_UID:-$UID} player ; groupmod -o -g ${MALIOR_GID:-$UID} player ; \
+            echo 'link hostfs /tmp/.X11-unix' && \
+                rm -rf /tmp/.X11-unix && echo '    delete old /tmp/.X11-unix' ; \
+                ln -sf /hostfs/tmp/.X11-unix /tmp/.X11-unix ; \
+            echo 'link hostfs ${XDG_RUNTIME_DIR:-/run/user/$UID}' && \
+                rm -rf ${XDG_RUNTIME_DIR:-/run/user/$UID} && echo '    delete old /run/user' ; \
+                ln -sf /hostfs${XDG_RUNTIME_DIR:-/run/user/$UID} ${XDG_RUNTIME_DIR:-/run/user/$UID} ; \
+            echo 'override player'\"'\"'s permission' && \
+                chown player:player /home/player/{.config,.local} \
+                    /home/player/{.config,.local}/malior /home/player/.config/pulse ; \
+            echo 'override XDG_RUNTIME_DIR permission' && \
+                chmod 700 ${XDG_RUNTIME_DIR:-/run/user/$UID} ; \
+            echo 'add _apt to player|root group' && \
+                usermod -a -G player _apt && usermod -a -G root _apt \
+                && rm /etc/apt/apt.conf.d/docker-* ; \
+            echo 'link hostfs /var/lib/apt/lists' && \
+                mkdir -p /home/player/.local/malior/var/lib/apt \
+                && chmod 775 /home/player/.local/malior/var/lib/apt \
+                    /home/player/.local/malior/var/lib \
+                    /home/player/.local/malior/var \
+                    /home/player/.local/malior \
+                    /home/player/.local \
+                    /home/player \
+                && [ -d /var/lib/apt/lists ] && [ ! -d /home/player/.local/malior/var/lib/apt/lists ] \
+                && mv /var/lib/apt/lists /home/player/.local/malior/var/lib/apt ; \
+                [ -d /var/lib/apt/lists ] && rm -rf /var/lib/apt/lists ; \
+                ln -sf /home/player/.local/malior/var/lib/apt/lists /var/lib/apt/lists ; \
+            echo 'link hostfs /var/cache/apt' && \
+                mkdir -p /home/player/.local/malior/var/cache \
+                && chmod 775 /home/player/.local/malior/var/cache \
+                && [ -d /var/cache/apt ] && [ ! -d /home/player/.local/malior/var/cache/apt ] \
+                && mv /var/cache/apt /home/player/.local/malior/var/cache ; \
+                [ -d /var/cache/apt ] && rm -rf /var/cache/apt ; \
+                ln -sf /home/player/.local/malior/var/cache/apt /var/cache/apt ; \
+            "
+    fi
     # Restoring possibly wrong permissions
     sudo chown $USER:$USER ${XDG_RUNTIME_DIR:-/run/user/$UID} \
-        ${HOME}/{.config,.local} \
-        ${HOME}/{.config,.local}/malior \
-        ${HOME}/.config/pulse \
-        ${HOME}/.local/malior/share
+        $MALIOR_HOME/{.config,.local} \
+        $MALIOR_HOME/{.config,.local}/malior \
+        $MALIOR_HOME/.local/malior/share \
+        ${HOME}/.config/pulse
     sudo chmod 700 ${XDG_RUNTIME_DIR:-/run/user/$UID}
     sudo chmod 777 /tmp/.X11-unix
-    [ "$DOCKER_RUN_STATUS" != "0" ] && exit -1
+    [ "$DOCKER_RUN_STATUS" != "0" ] && exit 2
 }
 # process the first parametre only
 COMMAND=$1
@@ -133,7 +165,7 @@ case $COMMAND in
         if [ $MALIOR_RUNNING -eq 1 ]; then
             sudo docker rm -f malior-runtime-$USER
         fi
-        sudo docker pull chisbread/rk3588-gaming:${MALIOR_TAG:-base}
+        sudo docker pull chisbread/rk3588-gaming:${MALIOR_IMAGE:-base}
         MALIOR_RUNNING=0
         shift
         ;;
