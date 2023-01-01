@@ -37,16 +37,8 @@ Command:
 ```bash
 malior-sudo 'echo $USER'
 ```
-- X11 test
-```bash
-malior glmark2
-malior glmark2-es2
-```  
-- Wayland test
-```bash
-malior glmark2-wayland
-malior glmark2-es2-wayland
-``` 
+## Settings
+- [Settings document](./SETTINGS.md)
 ## Tips
 - Already have xonotic installed locally?
 ```
