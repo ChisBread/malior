@@ -26,13 +26,17 @@ wtag=${MALIOR_WINE_TAG:-"-1"} #example: -1 (some wine .deb files have -1 tag on 
 # malior-sudo mv /usr/local/bin/winecfg /usr/local/bin/winecfg-old
 # malior-sudo mv /usr/local/bin/wineserver /usr/local/bin/wineserver-old
 
+set -eE
+
 echo "[Wine] Download, extract wine, and install wine"
 if [ ! -e $MALIOR_HOME/.local/malior/bin/wine ]; then
     cd $MALIOR_HOME/.local/malior/Downloads
     [ ! -e wine-${wbranch}-i386_${wversion}~${wdist}${wtag}_i386.deb ] \
         && wget https://dl.winehq.org/wine-builds/${wid}/dists/${wdist}/main/binary-i386/wine-${wbranch}-i386_${wversion}~${wdist}${wtag}_i386.deb # download
+    
     [ ! -e wine-${wbranch}_${wversion}~${wdist}${wtag}_i386.deb ] \
         && wget https://dl.winehq.org/wine-builds/${wid}/dists/${wdist}/main/binary-i386/wine-${wbranch}_${wversion}~${wdist}${wtag}_i386.deb # (required for wine_i386 if no wine64 / CONFLICTS WITH wine64 support files)
+    
     malior "cd /home/player/.local/malior/Downloads && \
 dpkg-deb -x wine-${wbranch}-i386_${wversion}~${wdist}${wtag}_i386.deb wine-installer && \
 dpkg-deb -x wine-${wbranch}_${wversion}~${wdist}${wtag}_i386.deb wine-installer && \

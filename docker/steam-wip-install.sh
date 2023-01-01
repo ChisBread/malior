@@ -1,6 +1,7 @@
 #/bin/bash
 MALIOR_HOME=${MALIOR_HOME:-$HOME}
 source $MALIOR_HOME/.config/malior/envs.sh 2>&1 >/dev/null || true
+set -eE
 if [ ! -e $MALIOR_HOME/.local/malior/steam/bin/steam ]; then
     # create necessary directories
     mkdir -p $MALIOR_HOME/.local/malior/steam
