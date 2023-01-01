@@ -4,7 +4,7 @@ source $MALIOR_HOME/.config/malior/envs.sh 2>&1 >/dev/null || true
 # - Replace the variables below with your system's info.
 # - Note that we need the i386 version for Box86 even though we're installing it on our ARM processor.
 # - Wine download links from WineHQ: https://dl.winehq.org/wine-builds/
-
+echo "credits to https://ptitseb.github.io/box86/X86WINE.html"
 wbranch=${MALIOR_WINE_BRA:-"devel"} #example: devel, staging, or stable (wine-staging 4.5+ requires libfaudio0:i386 - see below)
 wversion=${MALIOR_WINE_VER:-"7.1"} #example: 7.1
 wid=${MALIOR_WINE_OS_RLS:-"debian"} #example: debian, ubuntu
