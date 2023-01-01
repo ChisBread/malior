@@ -17,7 +17,7 @@ cat > $MALIOR_HOME/.config/malior/envs.sh <<EOF
 # user settings
 # end of user settings
 # malior settings
-[ "$CONTAINER" == "DOCKER" ] && unset MALIOR_HOME
+[ "\$CONTAINER" == "DOCKER" ] && unset MALIOR_HOME
 export PATH=\${MALIOR_HOME:-\$HOME}/.local/malior/bin:/usr/games:\$PATH
 export USER=\$(whoami)
 # end of settings
