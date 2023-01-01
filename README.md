@@ -64,3 +64,7 @@ malior install xonotic # Will not re-download all content
 | Board                         | playable  |
 | ----------------------------- | --------- |
 | Orange Pi 5                   | ✅        | 
+
+# Thanks to the following projects:
+- [box86](https://github.com/ptitSeb/box86), [box64](https://github.com/ptitSeb/box64)
+- [panfork](https://gitlab.com/panfork/mesa)
