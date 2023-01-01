@@ -11,4 +11,4 @@ source \$HOME/.config/malior/envs.sh 2>&1 >/dev/null || true
 \$HOME/.local/malior/xonotic/all run
 EOF
 chmod +x $MALIOR_HOME/.local/malior/bin/xonotic
-mkdir $MALIOR_HOME/.config/malior/.xonotic  2>&1 >/dev/null || true
+[ ! -e $MALIOR_HOME/.config/malior/.xonotic ] && mkdir $MALIOR_HOME/.config/malior/.xonotic
