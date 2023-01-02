@@ -13,3 +13,4 @@ cd /home/player/.local/malior/gl4es/lib && ln -sf libGL.so.1 libGL.so \
 
 malior '[ "`grep LIB_GL4ES /home/player/.config/malior/envs.sh`" == "" ] && \
 echo "export LIB_GL4ES=/home/player/.local/malior/gl4es/lib" >> /home/player/.config/malior/envs.sh'
+echo "      mali blob test: ' MALI_BLOB=x11 malior glmark2'"

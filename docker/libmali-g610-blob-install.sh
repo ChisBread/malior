@@ -26,4 +26,4 @@ malior '[ "`grep BLOB_LIB_DRI2TO3 /home/player/.config/malior/envs.sh`" == "" ] 
 echo "export BLOB_LIB_DRI2TO3=/home/player/.local/malior/dri2to3/build" >> /home/player/.config/malior/envs.sh'
 
 echo "tips: blob driver without OpenGL support? 'malior install gl4es'"
-echo "      Run the application with the blob driver: ' MALI_BLOB_X11=1 malior glmark2-es2'"
+echo "      Run the application with the blob driver: ' MALI_BLOB=x11 malior glmark2-es2'"
