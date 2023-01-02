@@ -209,7 +209,7 @@ if [ $MALIOR_RUNNING -eq 0 ]; then
 fi
 
 _LD=''
-if [ "$MALI_BLOB" == "x11" ] || [ "$MALI_BLOB" == "wayland" ] ; then
+if [ "$MALI_BLOB" == "x11" ]; then
     MALIOR_LD_PRELOAD='$BLOB_LIB_DRI2TO3/libdri2to3.so'
     MALIOR_LD_LIBRARY_PATH='$LIB_GL4ES:$HOME/.local/malior/libmali/'$MALI_BLOB
     _LD='LIBGL_DEEPBIND=$HOME/.local/malior/libmali/'$MALI_BLOB'/libGLESv2.so'
