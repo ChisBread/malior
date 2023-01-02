@@ -80,6 +80,7 @@ function runtime_start() {
                 -v $MALIOR_HOME/.config/malior:/home/player/.config/malior \
                 -v $MALIOR_HOME/.local/malior:/home/player/.local/malior \
                 -v $MALIOR_HOME/.local/malior/share:/home/player/.local/share \
+                -v $MALIOR_HOME/.local/malior/wineprefix:/home/player/.wine \
                 $MALIOR_IMAGE
         DOCKER_RUN_STATUS=$?
     else
@@ -148,7 +149,8 @@ function runtime_start() {
         $MALIOR_HOME/{.config,.local} \
         $MALIOR_HOME/{.config,.local}/malior \
         $MALIOR_HOME/.local/malior/share \
-        ${HOME}/.config/pulse
+        $MALIOR_HOME/.local/malior/wineprefix \
+        ${HOME}/.config/pulse 
     sudo chmod 700 ${XDG_RUNTIME_DIR:-/run/user/$UID}
     sudo chmod 777 /tmp/.X11-unix
     [ "$DOCKER_RUN_STATUS" != "0" ] && exit 2

@@ -18,7 +18,7 @@ echo "export LIB_GL4ES=/home/player/.local/malior/gl4es/lib64" >> /home/player/.
 
 
 echo "build gl4es armhf"
-malior-sudo 'apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libxcb-present-dev:armhf libxcb-dri2-*dev:armhf libxcb-dri3-dev:armhf'
+malior-sudo 'apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libxcb-present-dev:armhf libxcb-dri2-*dev:armhf libxcb-dri3-dev:armhf libx11-dev:armhf'
 malior-sudo 'apt -o Dpkg::Options::="--force-overwrite" --fix-broken install'
 malior 'cd /home/player/.local/malior/gl4es ; \
 rm -rf build32 ; mkdir build32 ; cd build32 ; \
