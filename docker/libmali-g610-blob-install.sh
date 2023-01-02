@@ -28,7 +28,7 @@ malior '[ "`grep BLOB_LIB_DRI2TO3 /home/player/.config/malior/envs.sh`" == "" ] 
 echo "export BLOB_LIB_DRI2TO3=/home/player/.local/malior/dri2to3/build" >> /home/player/.config/malior/envs.sh'
 
 echo "build dri2to3 armhf"
-malior-sudo 'apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libxcb-present-dev:armhf libxcb-dri2-*dev:armhf libxcb-dri3-dev:armhf'
+malior-sudo 'apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libxcb-present-dev:armhf libxcb-dri2-*dev:armhf libxcb-dri3-dev:armhf libdrm-dev:armhf'
 malior-sudo 'apt -o Dpkg::Options::="--force-overwrite" --fix-broken install'
 
 malior 'cd /home/player/.local/malior/ && \
