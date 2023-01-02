@@ -107,8 +107,10 @@ function runtime_start() {
         # Initialize soft links and permissions
         sudo docker exec $DOCKER_OPTS --user=root malior-runtime-$USER \
             bash -c "\
+            echo 'link /home/player to /home/$USER' && \
+                ln -sf /home/player /home/$USER ; \
             echo 'change player'\"'\"'s GID:UID to ${MALIOR_UID:-$UID}:${MALIOR_GID:-$UID}' ; \
-            usermod -o -u ${MALIOR_UID:-$UID} player ; groupmod -o -g ${MALIOR_GID:-$UID} player ; \
+                usermod -o -u ${MALIOR_UID:-$UID} player ; groupmod -o -g ${MALIOR_GID:-$UID} player ; \
             echo 'link hostfs /tmp/.X11-unix' && \
                 rm -rf /tmp/.X11-unix && echo '    delete old /tmp/.X11-unix' ; \
                 ln -sf /hostfs/tmp/.X11-unix /tmp/.X11-unix ; \
