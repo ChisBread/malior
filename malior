@@ -191,7 +191,7 @@ case $COMMAND in
         exit
         ;;
     resume|start)
-        sudo docker start malior-runtime-$USER
+        runtime_start
         exit
         ;;
     install)
@@ -203,7 +203,25 @@ case $COMMAND in
         exit
         ;;
 esac
+
 if [ $MALIOR_RUNNING -eq 0 ]; then
     runtime_start
 fi
-sudo docker exec $DOCKER_OPTS --user=${MALIOR_EXEC_USER:-player} malior-runtime-$USER bash -c "source /home/player/.config/malior/envs.sh ; $*"
+
+_LD=''
+if [ ! -z "$MALI_BLOB_X11" ]; then
+    MALIOR_LD_PRELOAD='$BLOB_LIB_DRI2TO3/libdri2to3.so'
+    MALIOR_LD_LIBRARY_PATH='$LIB_GL4ES:$HOME/.local/malior/libmali/x11'
+    _LD='LIBGL_DEEPBIND=$HOME/.local/malior/libmali/x11/libGLESv2.so'
+fi
+
+if [ ! -z "$MALIOR_LD_PRELOAD" ]; then
+    _LD="$_LD LD_PRELOAD=$MALIOR_LD_PRELOAD"
+fi
+if [ ! -z "$MALIOR_LD_LIBRARY_PATH" ]; then
+    _LD="$_LD LD_LIBRARY_PATH=$MALIOR_LD_LIBRARY_PATH"
+fi
+if [ ! -z "$_LD" ]; then
+    echo -e "malior ld envs:\n$_LD"
+fi
+sudo docker exec $DOCKER_OPTS --user=${MALIOR_EXEC_USER:-player} malior-runtime-$USER bash -c "source /home/player/.config/malior/envs.sh ; $_LD $*"
