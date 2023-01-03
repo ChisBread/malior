@@ -1,11 +1,12 @@
 echo "credits to https://ptitseb.github.io/box86/X86WINE.html"
-
+WINE_BUILDS_MIRROR=${WINE_BUILDS_MIRROR:-dl.winehq.org}
+echo "Use wine mirror:$WINE_BUILDS_MIRROR"
 MALIOR_HOME=${MALIOR_HOME:-$HOME}
 source $MALIOR_HOME/.config/malior/envs.sh 2>&1 >/dev/null || true
 ### User-defined Wine version variables ################
 # - Replace the variables below with your system's info.
 # - Note that we need the i386 version for Box86 even though we're installing it on our ARM processor.
-# - Wine download links from WineHQ: https://dl.winehq.org/wine-builds/
+# - Wine download links from WineHQ: https://$WINE_BUILDS_MIRROR/wine-builds/
 wbranch=${MALIOR_WINE_BRA:-"devel"} #example: devel, staging, or stable (wine-staging 4.5+ requires libfaudio0:i386 - see below)
 wversion=${MALIOR_WINE_VER:-"7.1"} #example: 7.1
 wid=${MALIOR_WINE_OS_RLS:-"debian"} #example: debian, ubuntu
@@ -33,10 +34,10 @@ echo "[Wine] Download, extract wine, and install wine"
 if [ ! -e $MALIOR_HOME/.local/malior/bin/wine ]; then
     cd $MALIOR_HOME/.local/malior/Downloads
     [ ! -e wine-${wbranch}-i386_${wversion}~${wdist}${wtag}_i386.deb ] \
-        && wget https://dl.winehq.org/wine-builds/${wid}/dists/${wdist}/main/binary-i386/wine-${wbranch}-i386_${wversion}~${wdist}${wtag}_i386.deb # download
+        && wget https://$WINE_BUILDS_MIRROR/wine-builds/${wid}/dists/${wdist}/main/binary-i386/wine-${wbranch}-i386_${wversion}~${wdist}${wtag}_i386.deb # download
     
     [ ! -e wine-${wbranch}_${wversion}~${wdist}${wtag}_i386.deb ] \
-        && wget https://dl.winehq.org/wine-builds/${wid}/dists/${wdist}/main/binary-i386/wine-${wbranch}_${wversion}~${wdist}${wtag}_i386.deb # (required for wine_i386 if no wine64 / CONFLICTS WITH wine64 support files)
+        && wget https://$WINE_BUILDS_MIRROR/wine-builds/${wid}/dists/${wdist}/main/binary-i386/wine-${wbranch}_${wversion}~${wdist}${wtag}_i386.deb # (required for wine_i386 if no wine64 / CONFLICTS WITH wine64 support files)
     
     malior "cd /home/player/.local/malior/Downloads && \
 dpkg-deb -x wine-${wbranch}-i386_${wversion}~${wdist}${wtag}_i386.deb wine-installer && \
@@ -84,9 +85,9 @@ malior-sudo 'apt-get install -y libgssapi-krb5-2:armhf libkrb5-3:armhf libodbc1:
 malior-sudo 'apt-get install -y libxcomposite1:armhf libxcursor1:armhf libxfixes3:armhf libxi6:armhf libxinerama1:armhf libxrandr2:armhf'
 malior-sudo 'apt-get install -y libxrender1:armhf libxxf86vm1 libc6:armhf libcap2-bin:armhf' # to run wine-i386 through box86:armhf on aarch64
 # This list found by downloading...
-#	wget https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-i386/wine-devel-i386_7.1~bullseye-1_i386.deb
-#	wget https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-i386/winehq-devel_7.1~bullseye-1_i386.deb
-#	wget https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-i386/wine-devel_7.1~bullseye-1_i386.deb
+#	wget https://$WINE_BUILDS_MIRROR/wine-builds/debian/dists/bullseye/main/binary-i386/wine-devel-i386_7.1~bullseye-1_i386.deb
+#	wget https://$WINE_BUILDS_MIRROR/wine-builds/debian/dists/bullseye/main/binary-i386/winehq-devel_7.1~bullseye-1_i386.deb
+#	wget https://$WINE_BUILDS_MIRROR/wine-builds/debian/dists/bullseye/main/binary-i386/wine-devel_7.1~bullseye-1_i386.deb
 # then `dpkg-deb -I package.deb`. Read output, add `:armhf` to packages in dep list, then try installing them on Pi aarch64.
 
 echo "[Wine] These packages are needed for running wine-staging on RPiOS (Credits: chills340)"
