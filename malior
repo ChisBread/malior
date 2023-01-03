@@ -221,7 +221,7 @@ fi
 if [ "$MALI_BLOB" == "x11-32" ]; then
     MALIOR_LD_PRELOAD='$BLOB_LIB_DRI2TO3_32/libdri2to3.so'
     MALIOR_LD_LIBRARY_PATH='$LIB_GL4ES_32:$HOME/.local/malior/libmali/x11-32'
-    _LD='LIBGL_DEEPBIND=0'
+    _LD='LIBGL_DEEPBIND=0 SETARCH=" "'
 fi
 
 if [ ! -z "$MALIOR_LD_PRELOAD" ]; then
