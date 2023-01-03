@@ -55,7 +55,7 @@ echo "[Wine] Install shortcuts (make 32bit launcher & symlinks. Credits: grayduc
 cat > $MALIOR_HOME/.local/malior/bin/wine <<EOF
 #!/bin/bash
 SETARCH='setarch linux32 -L'
-if [ "`echo \$LD_LIBRARY_PATH|grep libmali.x11-32`" != "" ]; then
+if [ "`echo \$LD_LIBRARY_PATH\|grep libmali.x11-32`" != "" ]; then
     echo "Detect using libmali blob driver, do not use setarch (will cause mmap to fail, resulting in no sound)"
     SETARCH=''
 fi
