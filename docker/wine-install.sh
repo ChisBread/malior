@@ -53,15 +53,7 @@ echo "[Wine] Install shortcuts (make 32bit launcher & symlinks. Credits: grayduc
 # Create a script to launch wine programs as 32bit only
 cat > $MALIOR_HOME/.local/malior/bin/wine <<EOF
 #!/bin/bash
-SETARCH='setarch linux32 -L'
-if [ "`echo \$LD_LIBRARY_PATH\|grep libmali.x11-32`" != "" ]; then
-    echo "Detect using libmali blob driver, do not use setarch (will cause mmap to fail, resulting in no sound)"
-    SETARCH=''
-fi
-echo 'wine with envs:'
-echo "    LD_LIBRARY_PATH=\$LD_LIBRARY_PATH"
-echo "    LD_PRELOAD=\$LD_PRELOAD"
-echo "    SETARCH=\$SETARCH"
+SETARCH=\${SETARCH:'setarch linux32 -L'}
 \$SETARCH \$HOME/.local/malior/wine/bin/wine "\$@"
 EOF
 
