@@ -28,7 +28,6 @@ wtag=${MALIOR_WINE_TAG:-"-1"} #example: -1 (some wine .deb files have -1 tag on 
 # malior-sudo mv /usr/local/bin/winecfg /usr/local/bin/winecfg-old
 # malior-sudo mv /usr/local/bin/wineserver /usr/local/bin/wineserver-old
 
-set -eE
 
 echo "[Wine] Download, extract wine, and install wine"
 if [ ! -e $MALIOR_HOME/.local/malior/bin/wine ]; then
