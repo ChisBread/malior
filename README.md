@@ -56,7 +56,7 @@ malior install xonotic # Will not re-download all content
 | glmark2(gl,es2,x11,wayland)   | ✅        | 
 | xonotic(sdl)                  | ✅        | 
 | openmw                        | ✅(not fully tested) | 
-| Warcraft III                  | ✅        |
+| Warcraft III(box86+wine)      | ✅(perfect!)        |
 | steam(box86)                  | ✅        | 
 | L4D2                          | ❌(bootable but not playable) |
 
