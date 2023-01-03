@@ -53,7 +53,7 @@ echo "[Wine] Install shortcuts (make 32bit launcher & symlinks. Credits: grayduc
 # Create a script to launch wine programs as 32bit only
 cat > $MALIOR_HOME/.local/malior/bin/wine <<EOF
 #!/bin/bash
-SETARCH=\${SETARCH:'setarch linux32 -L'}
+SETARCH=\${SETARCH:-'setarch linux32 -L'}
 \$SETARCH \$HOME/.local/malior/wine/bin/wine "\$@"
 EOF
 
