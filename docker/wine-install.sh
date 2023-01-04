@@ -68,7 +68,6 @@ chmod +x /home/player/.local/malior/bin/{wine,wine-ori,wineboot,winecfg,wineserv
 echo "[Wine] These packages are needed for running wine on a 64-bit OS via multiarch"
 malior-sudo 'dpkg --add-architecture armhf && apt-get update' # enable multi-arch
 malior-sudo 'apt-get install -y libasound2:armhf libc6:armhf libglib2.0-0:armhf libgphoto2-6:armhf libgphoto2-port12:armhf'
-malior-sudo 'apt -o Dpkg::Options::="--force-overwrite" --fix-broken install'
 malior-sudo 'apt-get install -y libgstreamer-plugins-base1.0-0:armhf libgstreamer1.0-0:armhf libldap-*:armhf libopenal1:armhf libpcap0.8:armhf'
 malior-sudo 'apt-get install -y libpulse0:armhf libsane1:armhf libudev1:armhf libusb-1.0-0:armhf libvkd3d1:armhf libx11-6:armhf libxext6:armhf'
 malior-sudo 'apt-get install -y libasound2-plugins:armhf ocl-icd-libopencl1:armhf libncurses6:armhf libncurses5:armhf libcap2-bin:armhf libcups2:armhf'
