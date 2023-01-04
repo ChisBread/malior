@@ -19,7 +19,7 @@ echo "export LIB_GL4ES=/home/player/.local/malior/gl4es/lib64" >> /home/player/.
 
 echo "build gl4es armhf"
 malior-sudo 'apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libxcb-present-dev:armhf libxcb-dri2-*dev:armhf libxcb-dri3-dev:armhf libx11-dev:armhf'
-malior-sudo 'apt -o Dpkg::Options::="--force-overwrite" --fix-broken install'
+malior-sudo 'apt-get -o Dpkg::Options::="--force-overwrite" --fix-broken install'
 malior 'cd /home/player/.local/malior/gl4es ; \
 rm -rf build32 ; mkdir build32 ; cd build32 ; \
 CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ cmake .. -DODROID=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo && make -j$(expr $(nproc) + 3) ; \
@@ -30,4 +30,7 @@ cp -r /home/player/.local/malior/gl4es/lib /home/player/.local/malior/gl4es/lib3
 malior '[ "`grep LIB_GL4ES_32 /home/player/.config/malior/envs.sh`" == "" ] && \
 echo "export LIB_GL4ES_32=/home/player/.local/malior/gl4es/lib32" >> /home/player/.config/malior/envs.sh'
 
+echo "build remove cross build toolchain"
+malior-sudo 'apt-get remove -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf'
+malior-sudo 'apt-get -o Dpkg::Options::="--force-overwrite" install -y cpp:armhf cpp-11:armhf'
 echo "      mali blob test: ' MALI_BLOB=x11 malior glmark2'"
