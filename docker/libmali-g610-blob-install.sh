@@ -15,7 +15,7 @@ cd $MALIOR_HOME/.local/malior/libmali/x11-32
 ln -sf libmali-valhall-g610-g6p0-x11-gbm.so libmali.so.1
 for l in libEGL.so libEGL.so.1 libgbm.so.1 libGLESv2.so libGLESv2.so.2 libOpenCL.so.1; do ln -sf libmali.so.1 $l; done
 
-echo "build dri2to3"
+echo "[libmali|dri2to3] build dri2to3"
 malior-sudo 'apt-get update && apt-get install -y build-essential meson cmake libxcb-present-dev libxcb-dri2-*dev libxcb-dri3-dev'
 malior-sudo 'apt -o Dpkg::Options::="--force-overwrite" --fix-broken install'
 
@@ -27,7 +27,7 @@ cd dri2to3 ; rm -rf build ; mkdir build ; cd build && meson setup && ninja ; \
 malior '[ "`grep BLOB_LIB_DRI2TO3 /home/player/.config/malior/envs.sh`" == "" ] && \
 echo "export BLOB_LIB_DRI2TO3=/home/player/.local/malior/dri2to3/build" >> /home/player/.config/malior/envs.sh'
 
-echo "build dri2to3 armhf"
+echo "[libmali|dri2to3] build dri2to3 armhf"
 malior-sudo 'apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libxcb-present-dev:armhf libxcb-dri2-*dev:armhf libxcb-dri3-dev:armhf libdrm-dev:armhf'
 malior-sudo 'apt -o Dpkg::Options::="--force-overwrite" --fix-broken install'
 
@@ -41,6 +41,9 @@ malior '[ "`grep BLOB_LIB_DRI2TO3_32 /home/player/.config/malior/envs.sh`" == ""
 echo "export BLOB_LIB_DRI2TO3_32=/home/player/.local/malior/dri2to3/build32" >> /home/player/.config/malior/envs.sh'
 
 
+echo "[libmali|dri2to3] remove cross build toolchain"
+malior-sudo 'apt-get remove -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf'
+malior-sudo 'apt-get -o Dpkg::Options::="--force-overwrite" install -y cpp:armhf cpp-11:armhf'
 
 
 echo "tips: blob driver without OpenGL support? 'malior install gl4es'"
