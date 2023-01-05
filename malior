@@ -68,7 +68,7 @@ function runtime_start() {
                 --mount type=tmpfs,destination=/tmp \
                 --mount type=tmpfs,destination=/run \
                 --mount type=tmpfs,destination=/run/lock \
-                $(ls -v /dev|grep -P 'mali0|kfd|nvidia|vga_arbiter|video|dri|snd|shm'|awk '{print "-v /dev/"$1":/dev/"$1}') \
+                $(ls -v /dev|grep -P 'mali0|fb0|kfd|nvidia|vga_arbiter|video|dri|snd|shm'|awk '{print "-v /dev/"$1":/dev/"$1}') \
                 $( [ -e /etc/machine-id ] && echo '-v /etc/machine-id:/etc/machine-id' ) \
                 $( [ -e /etc/pulse ] && echo '-v /etc/pulse:/etc/pulse' ) \
                 $( [ -e /etc/alsa ] && echo '-v /etc/alsa:/etc/alsa' ) \
