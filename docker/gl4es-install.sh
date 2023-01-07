@@ -8,7 +8,7 @@ malior-sudo 'apt-get update && apt-get install -y  build-essential meson cmake l
 malior-sudo 'apt -o Dpkg::Options::="--force-overwrite" --fix-broken install'
 malior 'cd /home/player/.local/malior/ && \
 git clone https://github.com/ptitSeb/gl4es ; \
-cd gl4es i; rm -rf lib64 ; rm -rf build ; mkdir build ; cd build && cmake .. -DODROID=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo && make -j$(expr $(nproc) + 3) ; \
+cd gl4es ; rm -rf lib64 ; rm -rf build ; mkdir build ; cd build && cmake .. -DODROID=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo && make -j$(expr $(nproc) + 3) ; \
 cd /home/player/.local/malior/gl4es/lib && ln -sf libGL.so.1 libGL.so ; \
 cp -r /home/player/.local/malior/gl4es/lib /home/player/.local/malior/gl4es/lib64 \
 '
