@@ -8,7 +8,7 @@ malior-sudo 'apt-get update && apt-get install -y  build-essential meson cmake l
 malior-sudo 'apt -o Dpkg::Options::="--force-overwrite" --fix-broken install'
 malior 'cd /home/player/.local/malior/ && \
 git clone https://github.com/ptitSeb/gl4es ; \
-cd gl4es ; rm -rf build ; mkdir build ; cd build && cmake .. -DODROID=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo && make -j$(expr $(nproc) + 3) ; \
+cd gl4es i; rm -rf lib64 ; rm -rf build ; mkdir build ; cd build && cmake .. -DODROID=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo && make -j$(expr $(nproc) + 3) ; \
 cd /home/player/.local/malior/gl4es/lib && ln -sf libGL.so.1 libGL.so ; \
 cp -r /home/player/.local/malior/gl4es/lib /home/player/.local/malior/gl4es/lib64 \
 '
@@ -21,7 +21,7 @@ echo "[gl4es] build gl4es armhf"
 malior-sudo 'apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libxcb-present-dev:armhf libxcb-dri2-*dev:armhf libxcb-dri3-dev:armhf libx11-dev:armhf'
 malior-sudo 'apt-get -o Dpkg::Options::="--force-overwrite" --fix-broken install'
 malior 'cd /home/player/.local/malior/gl4es ; \
-rm -rf build32 ; mkdir build32 ; cd build32 ; \
+rm -rf lib32 ; rm -rf build32 ; mkdir build32 ; cd build32 ; \
 CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ cmake .. -DODROID=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo && make -j$(expr $(nproc) + 3) ; \
 cd /home/player/.local/malior/gl4es/lib && ln -sf libGL.so.1 libGL.so ; \
 cp -r /home/player/.local/malior/gl4es/lib /home/player/.local/malior/gl4es/lib32 \
