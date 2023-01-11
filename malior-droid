@@ -23,6 +23,7 @@ function help() {
     cat <<EOF
 Usage: 
     $(basename $0) [command] <game|application> <args>
+    note. kernel config PSI ASHMEM ANDROID_BINDERFS etc... is required
     e.g. 
         'malior-droid whoami' is same as 'adb shell whoami' (root user)
         'adb connect localhost:5555' for adb
