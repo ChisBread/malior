@@ -35,7 +35,14 @@ Command:
     destroy                Stop and remove malior redroid container
     pause|stop             Pause(docker stop) malior redroid container
     resume|start           Resume(docker start) malior redroid container
+    resize                 Resize redroid window e.g. malior-droid resize 1920x1080
 EOF
+}
+
+function resize() {
+    sudo docker exec $DOCKER_OPTS redroid-rk3588-$USER  /system/bin/sh -c "
+        wm size $1
+    "
 }
 
 function runtime_start() {
@@ -71,7 +78,8 @@ function runtime_start() {
         done
      
         sudo docker exec $DOCKER_OPTS redroid-rk3588-$USER  /system/bin/sh -c "
-            wm size ${MALIOR_DROID_WMSIZE:-1080x2140} && \
+            wm size ${MALIOR_DROID_WMSIZE:-1080x2160} ; \
+            settings put global private_dns_mode off ; \
             setprop persist.sys.locale ${MALIOR_DROID_LANG:-en}; \
             setprop persist.sys.timezone \"${MALIOR_DROID_TZ:-$(cat /etc/timezone)}\"; \
             pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
@@ -122,6 +130,11 @@ case $COMMAND in
         runtime_start
         exit
         ;;
+    resize)
+        resize $2
+        exit
+        ;;
+
 esac
 
 if [ $MALIOR_RUNNING -eq 0 ]; then
