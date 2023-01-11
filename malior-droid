@@ -102,7 +102,7 @@ function runtime_start() {
         setprop ro.boot.redroid_net_dns1 ${MALIOR_DROID_DNS1:-8.8.8.8} ; \
         setprop ro.boot.redroid_net_dns2 ${MALIOR_DROID_DNS2:-8.8.4.4} ; \
         /vendor/bin/ipconfigstore ; \
-        pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
+        pm uninstall -k --user 0 com.firefly.fireflyapi2service ; \
         pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
         stop;sleep 3;start; \
     "
