@@ -52,43 +52,43 @@ function runtime_start() {
             -p ${MALIOR_DROID_PORT:-5555}:5555 \
             $(ls -v /dev|grep -P 'mali0|fb0|kfd|nvidia|vga_arbiter|video|dri|snd|shm'|awk '{print "-v /dev/"$1":/dev/"$1}') \
             ${MALIOR_DROID_IMAGE}
-        #init
-         # Wait for some initialization
-        LOOP_CNT=0
-        
-        echo "checking android status..."
-        while :
-        do
-            LOOP_CNT=$(( $LOOP_CNT + 1 ))
-            if [ $LOOP_CNT -eq 100 ]; then
-                sudo docker rm -f redroid-rk3588-$USER
-                exit 1
-            fi
-            sleep 4
-            echo "check android status $LOOP_CNT times"
-
-            sudo docker exec $DOCKER_OPTS redroid-rk3588-$USER \
-                /system/bin/sh -c '[ -e /dev/binderfs/binder ] || exit 1'
-            [ "$?" != "0" ] && echo '    /dev/binderfs/binder not available' && continue
-            sudo docker exec $DOCKER_OPTS redroid-rk3588-$USER \
-                /system/bin/sh -c '[ "$(ps |grep com.android.systemui)" != "" ] || exit 1'
-            [ "$?" != "0" ] && echo '    com.android.systemui not available' && continue
-
-            break
-        done
-     
-        sudo docker exec $DOCKER_OPTS redroid-rk3588-$USER  /system/bin/sh -c "
-            wm size ${MALIOR_DROID_WMSIZE:-1080x2160} ; \
-            settings put global private_dns_mode off ; \
-            setprop persist.sys.locale ${MALIOR_DROID_LANG:-en}; \
-            setprop persist.sys.timezone \"${MALIOR_DROID_TZ:-$(cat /etc/timezone)}\"; \
-            pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
-            pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
-            stop;sleep 3;start; \
-        "
     else
         sudo docker start redroid-rk3588-$USER
     fi
+    #init
+     # Wait for some initialization
+    LOOP_CNT=0
+    
+    echo "checking android status..."
+    while :
+    do
+        LOOP_CNT=$(( $LOOP_CNT + 1 ))
+        if [ $LOOP_CNT -eq 100 ]; then
+            sudo docker rm -f redroid-rk3588-$USER
+            exit 1
+        fi
+        sleep 4
+        echo "check android status $LOOP_CNT times"
+
+        sudo docker exec $DOCKER_OPTS redroid-rk3588-$USER \
+            /system/bin/sh -c '[ -e /dev/binderfs/binder ] || exit 1'
+        [ "$?" != "0" ] && echo '    /dev/binderfs/binder not available' && continue
+        sudo docker exec $DOCKER_OPTS redroid-rk3588-$USER \
+            /system/bin/sh -c '[ "$(ps |grep com.android.systemui)" != "" ] || exit 1'
+        [ "$?" != "0" ] && echo '    com.android.systemui not available' && continue
+
+        break
+    done
+
+    # settings put global private_dns_mode off ;
+    sudo docker exec $DOCKER_OPTS redroid-rk3588-$USER  /system/bin/sh -c "
+        wm size ${MALIOR_DROID_WMSIZE:-1080x2160} ; \
+        setprop persist.sys.locale ${MALIOR_DROID_LANG:-en}; \
+        setprop persist.sys.timezone \"${MALIOR_DROID_TZ:-$(cat /etc/timezone)}\"; \
+        pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
+        pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
+        stop;sleep 3;start; \
+    "
 }
 COMMAND=$1
 case $COMMAND in
