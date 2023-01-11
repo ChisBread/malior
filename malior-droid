@@ -1,0 +1,130 @@
+#!/bin/env bash
+# set -ex
+MH_BEFORE=${MALIOR_HOME:-$HOME}
+source ${MALIOR_HOME:-$HOME}/.config/malior/envs.sh
+[ ! -z "$MALIOR_HOME" ] && [ "$MH_BEFORE" != "$MALIOR_HOME" ] \
+    && echo "Found new MALIOR_HOME $MH_BEFORE -> $MALIOR_HOME" \
+    && echo "It is recommended to put MALIOR_HOME in .bashrc instead of envs.sh" \
+    && source $MALIOR_HOME/.config/malior/envs.sh
+
+MALIOR_HOME=${MALIOR_HOME:-$HOME}
+MALIOR_PREFIX=${MALIOR_PREFIX:-https://github.com/ChisBread}
+MALIOR_DROID_IMAGE=${MALIOR_IMAGE:-chisbread/rk3588-gaming:redroid-firefly}
+
+MALIOR_RUNNING=1
+if [ "`sudo docker ps|grep redroid-rk3588-$USER`" == "" ]; then
+    MALIOR_RUNNING=0
+fi
+DOCKER_OPTS='-i'
+if [ -t 0 ] && [ -t 1 ]; then
+    DOCKER_OPTS=$DOCKER_OPTS" -t"
+fi
+function help() {
+    cat <<EOF
+Usage: 
+    $(basename $0) [command] <game|application> <args>
+    e.g. 
+        'malior-droid whoami' is same as 'adb shell whoami' (root user)
+        'adb connect localhost:5555' for adb
+        'scrcpy -s localhost:5555' view redroid screen
+Command:
+    help                   This usage guide
+    update                 Update malior redroid image
+    recreate               Recreate malior redroid container
+    destroy                Stop and remove malior redroid container
+    pause|stop             Pause(docker stop) malior redroid container
+    resume|start           Resume(docker start) malior redroid container
+EOF
+}
+
+function runtime_start() {
+    if [ "`sudo docker container ls -a|grep redroid-rk3588-$USER`" == "" ]; then
+        sudo docker run -itd --privileged --name redroid-rk3588-$USER \
+            -v $MALIOR_HOME/.local/malior/redroid:/data \
+            -p ${MALIOR_DROID_PORT:-5555}:5555 \
+            $(ls -v /dev|grep -P 'mali0|fb0|kfd|nvidia|vga_arbiter|video|dri|snd|shm'|awk '{print "-v /dev/"$1":/dev/"$1}') \
+            ${MALIOR_DROID_IMAGE}
+        #init
+         # Wait for some initialization
+        LOOP_CNT=0
+        
+        echo "checking android status..."
+        while :
+        do
+            LOOP_CNT=$(( $LOOP_CNT + 1 ))
+            if [ $LOOP_CNT -eq 100 ]; then
+                sudo docker rm -f redroid-rk3588-$USER
+                exit 1
+            fi
+            sleep 4
+            echo "check android status $LOOP_CNT times"
+
+            sudo docker exec $DOCKER_OPTS redroid-rk3588-$USER \
+                /system/bin/sh -c '[ -e /dev/binderfs/binder ] || exit 1'
+            [ "$?" != "0" ] && echo '    /dev/binderfs/binder not available' && continue
+            sudo docker exec $DOCKER_OPTS redroid-rk3588-$USER \
+                /system/bin/sh -c '[ "$(ps |grep com.android.systemui)" != "" ] || exit 1'
+            [ "$?" != "0" ] && echo '    com.android.systemui not available' && continue
+
+            break
+        done
+     
+        sudo docker exec $DOCKER_OPTS redroid-rk3588-$USER  /system/bin/sh -c "
+            wm size ${MALIOR_DROID_WMSIZE:-1080x2140} && \
+            setprop persist.sys.locale ${MALIOR_DROID_LANG:-en}; \
+            setprop persist.sys.timezone \"${MALIOR_DROID_TZ:-$(cat /etc/timezone)}\"; \
+            pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
+            pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
+            stop;sleep 3;start; \
+        "
+    else
+        sudo docker start redroid-rk3588-$USER
+    fi
+}
+COMMAND=$1
+case $COMMAND in
+    help)
+        help
+        exit
+        ;;
+    update)
+        if [ $MALIOR_RUNNING -eq 1 ]; then
+            sudo docker rm -f redroid-rk3588-$USER
+        fi
+        sudo docker pull ${MALIOR_DROID_IMAGE}
+        MALIOR_RUNNING=0
+        shift
+        ;;
+    recreate)
+        if [ $MALIOR_RUNNING -eq 1 ]; then
+            sudo docker rm -f redroid-rk3588-$USER
+        fi
+        MALIOR_RUNNING=0
+        shift
+        ;;
+    destroy)
+        if [ $MALIOR_RUNNING -eq 1 ]; then
+            sudo docker rm -f redroid-rk3588-$USER
+        fi
+        exit
+        ;;
+    pause|stop)
+        sudo docker stop redroid-rk3588-$USER
+        exit
+        ;;
+    resume|start)
+        runtime_start
+        exit
+        ;;
+    restart)
+        sudo docker stop redroid-rk3588-$USER
+        runtime_start
+        exit
+        ;;
+esac
+
+if [ $MALIOR_RUNNING -eq 0 ]; then
+    runtime_start
+fi
+
+sudo docker exec $DOCKER_OPTS redroid-rk3588-$USER  /system/bin/sh -c "$*" 

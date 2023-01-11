@@ -27,6 +27,7 @@ Command:
     destroy                Stop and remove malior runtime container
     pause|stop             Pause(docker stop) malior runtime container
     resume|start           Resume(docker start) malior runtime container
+    restart                Restart malior runtime container
     remove                 Remove game
 EOF
 }
@@ -169,7 +170,7 @@ case $COMMAND in
         if [ $MALIOR_RUNNING -eq 1 ]; then
             sudo docker rm -f malior-runtime-$USER
         fi
-        sudo docker pull chisbread/rk3588-gaming:${MALIOR_IMAGE:-base}
+        sudo docker pull ${MALIOR_IMAGE}
         MALIOR_RUNNING=0
         shift
         ;;
@@ -195,6 +196,11 @@ case $COMMAND in
         exit
         ;;
     resume|start)
+        runtime_start
+        exit
+        ;;
+    restart)
+        sudo docker stop malior-runtime-$USER
         runtime_start
         exit
         ;;
