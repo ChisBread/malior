@@ -47,11 +47,19 @@ function resize() {
 
 function runtime_start() {
     if [ "`sudo docker container ls -a|grep redroid-rk3588-$USER`" == "" ]; then
+        [ ! -d $MALIOR_HOME/.local/malior/redroid/malior/bin  ] && sudo mkdir -p $MALIOR_HOME/.local/malior/redroid/malior/bin
+        [ ! -f $MALIOR_HOME/.local/malior/redroid/malior/bin/ipconfigstore ] && \
+            sudo wget $MALIOR_PREFIX/malior/raw/main/docker/ipconfigstore -O $MALIOR_HOME/.local/malior/redroid/malior/bin/ipconfigstore && \
+            sudo chmod +x $MALIOR_HOME/.local/malior/redroid/malior/bin/ipconfigstore
         sudo docker run -itd --privileged --name redroid-rk3588-$USER \
             -v $MALIOR_HOME/.local/malior/redroid:/data \
+            -v $MALIOR_HOME/.local/malior/redroid/malior/bin/ipconfigstore:/vendor/bin/ipconfigstore \
             -p ${MALIOR_DROID_PORT:-5555}:5555 \
+            --entrypoint /init \
             $(ls -v /dev|grep -P 'mali0|fb0|kfd|nvidia|vga_arbiter|video|dri|snd|shm'|awk '{print "-v /dev/"$1":/dev/"$1}') \
-            ${MALIOR_DROID_IMAGE}
+            ${MALIOR_DROID_IMAGE} \
+            androidboot.hardware=rk30board
+            
     else
         sudo docker start redroid-rk3588-$USER
     fi
@@ -81,10 +89,19 @@ function runtime_start() {
     done
 
     # settings put global private_dns_mode off ;
+    GATEWAY=$(sudo docker inspect redroid-rk3588-$USER |grep '"Gateway"'| sed -e 's@[^0-9]*\([0-9].*[0-9]\)".*@\1@g'|sort -u)
+    CONIP=$(sudo docker inspect redroid-rk3588-$USER |grep '"IPAddress"'| sed -e 's@[^0-9]*\([0-9].*[0-9]\)".*@\1@g'|sort -u)
+    IPPRX=$(sudo docker inspect redroid-rk3588-$USER |grep '"IPPrefixLen"'| sed -e 's@[^0-9]*\([0-9]*\)[^0-9]*@\1@g'|sort -u)
     sudo docker exec $DOCKER_OPTS redroid-rk3588-$USER  /system/bin/sh -c "
         wm size ${MALIOR_DROID_WMSIZE:-1080x2160} ; \
         setprop persist.sys.locale ${MALIOR_DROID_LANG:-en}; \
         setprop persist.sys.timezone \"${MALIOR_DROID_TZ:-$(cat /etc/timezone)}\"; \
+        ip addr add $CONIP/$IPPRX dev eth0 ; \
+        ip route add default via $GATEWAY dev eth0 ; \
+        setprop ro.boot.redroid_net_ndns 2 ; \
+        setprop ro.boot.redroid_net_dns1 ${MALIOR_DROID_DNS1:-8.8.8.8} ; \
+        setprop ro.boot.redroid_net_dns2 ${MALIOR_DROID_DNS2:-8.8.4.4} ; \
+        /vendor/bin/ipconfigstore ; \
         pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
         pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
         stop;sleep 3;start; \
