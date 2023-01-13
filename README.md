@@ -69,3 +69,27 @@ malior install xonotic # Will not re-download all content
 # Thanks to the following projects:
 - [box86](https://github.com/ptitSeb/box86), [box64](https://github.com/ptitSeb/box64)
 - [panfork](https://gitlab.com/panfork/mesa)
+
+# Malior Redroid
+- malior install malior-redroid
+- malior-redroid help
+```
+Usage:
+    malior-droid [command] <game|application> <args>
+    note. kernel config PSI ASHMEM ANDROID_BINDERFS etc... is required
+    warning. zygisk is not supported, will mess up the container when enabled
+    e.g.
+        'malior-droid whoami' is same as 'adb shell whoami' (root user)
+        'adb connect localhost:5555' for adb
+        'scrcpy -s localhost:5555' view redroid screen
+Command:
+    help                   This usage guide
+    update                 Update malior redroid image
+    recreate               Recreate malior redroid container
+    destroy                Stop and remove malior redroid container
+    pause|stop             Pause(docker stop) malior redroid container
+    resume|start           Resume(docker start) malior redroid container
+    restart                Restart malior redroid container
+    resize                 Resize redroid window e.g. malior-droid resize 1920x1080
+    install-overlay        Overlays
+```
