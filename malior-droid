@@ -37,6 +37,7 @@ Command:
     resume|start           Resume(docker start) malior redroid container
     restart                Restart malior redroid container
     resize                 Resize redroid window e.g. malior-droid resize 1920x1080
+    install-overlay        Overlays
 EOF
 }
 
@@ -45,22 +46,39 @@ function resize() {
         wm size $1
     "
 }
-
+function safetydownloadto() {
+    sudo wget $1 -O $2
+    [ "$?" != "0" ] && echo "failed to download $1"
+}
+function install_overlay() {
+    [ ! -d $MALIOR_HOME/.local/malior/redroid_overlay/  ] && mkdir -p $MALIOR_HOME/.local/malior/redroid_overlay
+    safetydownloadto $MALIOR_PREFIX/malior/releases/download/redroid-overlays-latest/$1_overlay.zip \
+        $MALIOR_HOME/.local/malior/redroid_overlay/$1_overlay.zip
+    cd $MALIOR_HOME/.local/malior/redroid_overlay/
+    unzip -o $1_overlay.zip
+    rm -f $1_overlay.zip
+    cd -
+}
 function runtime_start() {
+    if [ ! -d $MALIOR_HOME/.local/malior/redroid_overlay/  ]; then
+        mkdir -p $MALIOR_HOME/.local/malior/redroid_overlay
+        echo "install base overlay"
+        install_overlay base
+        sudo chmod -R +x $MALIOR_HOME/.local/malior/redroid_overlay/vendor/bin/*
+    fi
+
     if [ "`sudo docker container ls -a|grep redroid-rk3588-$USER`" == "" ]; then
-        [ ! -d $MALIOR_HOME/.local/malior/redroid/malior/bin  ] && sudo mkdir -p $MALIOR_HOME/.local/malior/redroid/malior/bin
-        [ ! -f $MALIOR_HOME/.local/malior/redroid/malior/bin/ipconfigstore ] && \
-            sudo wget $MALIOR_PREFIX/malior/raw/main/docker/ipconfigstore -O $MALIOR_HOME/.local/malior/redroid/malior/bin/ipconfigstore && \
-            sudo chmod +x $MALIOR_HOME/.local/malior/redroid/malior/bin/ipconfigstore
         sudo docker run -itd --privileged --name redroid-rk3588-$USER \
             -v $MALIOR_HOME/.local/malior/redroid:/data \
-            -v $MALIOR_HOME/.local/malior/redroid/malior/bin/ipconfigstore:/vendor/bin/ipconfigstore \
+            $(find $MALIOR_HOME/.local/malior/redroid_overlay -type f | sed -e 's@\(.*local.*redroid_overlay\)\(.*\)@-v \1\2:\2@g') \
             -p ${MALIOR_DROID_PORT:-5555}:5555 \
             --entrypoint /init \
             $(ls -v /dev|grep -P 'mali0|fb0|kfd|nvidia|vga_arbiter|video|dri|snd|shm'|awk '{print "-v /dev/"$1":/dev/"$1}') \
             ${MALIOR_DROID_IMAGE} \
             androidboot.hardware=rk30board
-            
+        
+        echo "Some features (ro.secure=0 etc...) will take effect on the next start"
+
     else
         sudo docker start redroid-rk3588-$USER
     fi
@@ -95,6 +113,7 @@ function runtime_start() {
     IPPRX=$(sudo docker inspect redroid-rk3588-$USER |grep '"IPPrefixLen"'| sed -e 's@[^0-9]*\([0-9]*\)[^0-9]*@\1@g'|sort -u)
     sudo docker exec $DOCKER_OPTS redroid-rk3588-$USER  /system/bin/sh -c "
         wm size ${MALIOR_DROID_WMSIZE:-1080x2160} ; \
+        sed -i 's@ro.secure=1@ro.secure=0@g' /system/build.prop ; \
         setprop persist.sys.locale ${MALIOR_DROID_LANG:-en}; \
         setprop persist.sys.timezone \"${MALIOR_DROID_TZ:-$(cat /etc/timezone)}\"; \
         ip addr add $CONIP/$IPPRX dev eth0 ; \
@@ -104,6 +123,8 @@ function runtime_start() {
         setprop ro.boot.redroid_net_dns2 ${MALIOR_DROID_DNS2:-8.8.4.4} ; \
         /vendor/bin/ipconfigstore ; \
         pm uninstall -k --user 0 com.firefly.fireflyapi2service ; \
+        pm uninstall -k --user 0 com.firefly.fireflyapi2service ; \
+        pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
         pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
         stop;sleep 3;start; \
     "
@@ -130,9 +151,7 @@ case $COMMAND in
         shift
         ;;
     destroy)
-        if [ $MALIOR_RUNNING -eq 1 ]; then
-            sudo docker rm -f redroid-rk3588-$USER
-        fi
+        sudo docker rm -f redroid-rk3588-$USER
         exit
         ;;
     pause|stop)
@@ -150,6 +169,10 @@ case $COMMAND in
         ;;
     resize)
         resize $2
+        exit
+        ;;
+    install-overlay)
+        install_overlay $2
         exit
         ;;
 

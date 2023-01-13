@@ -189,9 +189,7 @@ case $COMMAND in
         exit -1
         ;;
     destroy)
-        if [ $MALIOR_RUNNING -eq 1 ]; then
-            sudo docker rm -f malior-runtime-$USER
-        fi
+        sudo docker rm -f malior-runtime-$USER
         exit
         ;;
     pause|stop)
