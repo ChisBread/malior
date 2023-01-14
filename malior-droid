@@ -71,7 +71,7 @@ function runtime_start() {
     if [ "`sudo docker container ls -a|grep redroid-rk3588-$USER`" == "" ]; then
         sudo docker run -itd --privileged --name redroid-rk3588-$USER \
             -v $MALIOR_HOME/.local/malior/redroid:/data \
-            $(find $MALIOR_HOME/.local/malior/redroid_overlay -type f | sed -e 's@\(.*local.*redroid_overlay\)\(.*\)@-v \1\2:\2@g') \
+            $(sudo find $MALIOR_HOME/.local/malior/redroid_overlay -type f | sed -e 's@\(.*local.*redroid_overlay\)\(.*\)@-v \1\2:\2@g') \
             -p ${MALIOR_DROID_PORT:-5555}:5555 \
             --entrypoint /init \
             $(ls -v /dev|grep -P 'mali0|fb0|kfd|nvidia|vga_arbiter|video|dri|snd|shm'|awk '{print "-v /dev/"$1":/dev/"$1}') \
