@@ -55,10 +55,7 @@ function install_overlay() {
     [ ! -d $MALIOR_HOME/.local/malior/redroid_overlay/  ] && mkdir -p $MALIOR_HOME/.local/malior/redroid_overlay
     safetydownloadto $MALIOR_PREFIX/malior/releases/download/redroid-overlays-latest/$1_overlay.zip \
         $MALIOR_HOME/.local/malior/redroid_overlay/$1_overlay.zip
-    cd $MALIOR_HOME/.local/malior/redroid_overlay/
-    unzip -o $1_overlay.zip
-    rm -f $1_overlay.zip
-    cd -
+    sudo bash -c "cd $MALIOR_HOME/.local/malior/redroid_overlay/ && unzip -o $1_overlay.zip && rm -f $1_overlay.zip"
 }
 function runtime_start() {
     if [ ! -d $MALIOR_HOME/.local/malior/redroid_overlay/  ]; then
@@ -127,6 +124,7 @@ function runtime_start() {
         pm uninstall -k --user 0 com.firefly.fireflyapi2service ; \
         pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
         pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
+        pm install -r /system/priv-app/MicroGGMSCore/MicroGGMSCore.apk ; \
         stop;sleep 3;start; \
     "
 }
