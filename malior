@@ -36,6 +36,10 @@ function install() {
         sudo chmod +x /usr/local/bin/malior  && exit
     [ "$1" == "malior-droid" ] && sudo wget $MALIOR_PREFIX/malior/raw/main/malior-droid -O /usr/local/bin/malior-droid && \
         sudo chmod +x /usr/local/bin/malior-droid && exit
+    if [ $MALIOR_RUNNING -eq 0 ]; then
+        runtime_start
+        MALIOR_RUNNING=1
+    fi
     wget -O - $MALIOR_PREFIX/malior/raw/main/docker/$1-install.sh > /tmp/$1-install.sh 
     bash /tmp/$1-install.sh
     rm /tmp/$1-install.sh
@@ -206,10 +210,6 @@ case $COMMAND in
         exit
         ;;
     install)
-        if [ $MALIOR_RUNNING -eq 0 ]; then
-            runtime_start
-            MALIOR_RUNNING=1
-        fi
         install $2
         exit
         ;;
