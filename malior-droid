@@ -73,7 +73,7 @@ function runtime_start() {
             $(sudo find $MALIOR_HOME/.local/malior/redroid_overlay -type f | sed -e 's@\(.*local.*redroid_overlay\)\(.*\)@-v \1\2:\2@g') \
             -p ${MALIOR_DROID_PORT:-5555}:5555 \
             --entrypoint /init \
-            $(ls -v /dev|grep -P 'mali0|fb0|kfd|nvidia|vga_arbiter|video|dri|snd|shm'|awk '{print "-v /dev/"$1":/dev/"$1}') \
+            $(ls -v /dev|grep -P 'mali0|fb0|kfd|nvidia|vga_arbiter|video|dri|snd|/shm'|awk '{print "-v /dev/"$1":/dev/"$1}') \
             ${MALIOR_DROID_IMAGE} \
             androidboot.hardware=rk30board
         
