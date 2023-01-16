@@ -98,3 +98,6 @@ Command:
     - (Optional) Install Riru-v25.4.4 LSPosed-v1.8.5 (tested version)
     - (Optional) Register [GSF ID](https://www.google.com/android/uncertified/?pli=1), let Google framework work
         - Use the device id app to get the GSF ID
+- Backup: data partition `~/.local/malior/redroid`.
+- Restore: `malior-droid destroy` and restore data partition from backup.
+
