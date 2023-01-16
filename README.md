@@ -100,5 +100,16 @@ Command:
     - (Optional) Register [GSF ID](https://www.google.com/android/uncertified/?pli=1), let Google framework work
         - Use the device id app to get the GSF ID
 - Backup: data partition `~/.local/malior/redroid`.
+```
+# backup
+cd ~/.local/malior/redroid
+sudo tar cvpjf backup.tgz *
+```
 - Restore: `malior-droid destroy` and restore data partition from backup.
-
+```
+# restore
+malior-droid destroy
+cd ~/.local/malior/redroid
+sudo tar xvpjf backup.tgz
+malior-droid echo 'hello'
+```
