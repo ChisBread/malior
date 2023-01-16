@@ -38,7 +38,9 @@ Command:
     resume|start           Resume(docker start) malior redroid container
     restart                Restart malior redroid container
     resize                 Resize redroid window e.g. malior-droid resize 1920x1080
-    install-overlay        Overlays
+    install-overlay        Overlays, it will be mounted on the rootfs of redroid and stored in ~/.local/malior/redroid_overlay
+                               base: Automatically installed overlay, providing magisk support and gapps support
+
 EOF
 }
 
@@ -124,7 +126,6 @@ function runtime_start() {
         pm uninstall -k --user 0 com.firefly.fireflyapi2service ; \
         pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
         pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
-        pm install -r /system/priv-app/MicroGGMSCore/MicroGGMSCore.apk ; \
         stop;sleep 3;start; \
     "
 }
