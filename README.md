@@ -91,7 +91,8 @@ Command:
     resume|start           Resume(docker start) malior redroid container
     restart                Restart malior redroid container
     resize                 Resize redroid window e.g. malior-droid resize 1920x1080
-    install-overlay        Overlays
+    install-overlay        Overlays, it will be mounted on the rootfs of redroid and stored in ~/.local/malior/redroid_overlay
+                               base: Automatically installed overlay, providing magisk support and gapps support
 ```
 - Manual part
     - Fixup Magisk installation and reboot (Maybe it takes two times, maybe the host will restart)
