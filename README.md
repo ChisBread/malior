@@ -71,8 +71,8 @@ malior install xonotic # Will not re-download all content
 - [panfork](https://gitlab.com/panfork/mesa)
 
 # Malior Redroid
-- malior install malior-redroid
-- malior-redroid help
+- malior install malior-droid
+- malior-droid help
 ```
 Usage:
     malior-droid [command] <game|application> <args>
