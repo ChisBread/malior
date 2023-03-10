@@ -9,7 +9,7 @@ source ${MALIOR_HOME:-$HOME}/.config/malior/envs.sh
 
 MALIOR_HOME=${MALIOR_HOME:-$HOME}
 MALIOR_PREFIX=${MALIOR_PREFIX:-https://github.com/ChisBread}
-MALIOR_DROID_IMAGE=${MALIOR_IMAGE:-chisbread/rk3588-gaming:redroid-firefly}
+MALIOR_DROID_IMAGE=${MALIOR_IMAGE:-registry.cn-hangzhou.aliyuncs.com/whsyf/dobox:rk3588-202303010}
 
 MALIOR_RUNNING=1
 if [ "`sudo docker ps|grep redroid-rk3588-$USER`" == "" ]; then
@@ -72,10 +72,8 @@ function runtime_start() {
             -v $MALIOR_HOME/.local/malior/redroid:/data \
             $(sudo find $MALIOR_HOME/.local/malior/redroid_overlay -type f | sed -e 's@\(.*local.*redroid_overlay\)\(.*\)@-v \1\2:\2@g') \
             -p ${MALIOR_DROID_PORT:-5555}:5555 \
-            --entrypoint /init \
-            $(ls -v /dev|grep -P 'mali0|fb0|kfd|nvidia|vga_arbiter|video|dri|snd|/shm'|awk '{print "-v /dev/"$1":/dev/"$1}') \
-            ${MALIOR_DROID_IMAGE} \
-            androidboot.hardware=rk30board
+            -v /dev/net/tun:/dev/tun -v /dev/mali0:/dev/mali0 \
+            ${MALIOR_DROID_IMAGE}
         
         echo "Some features (ro.secure=0 etc...) will take effect on the next start"
 
@@ -96,38 +94,15 @@ function runtime_start() {
         fi
         sleep 4
         echo "check android status $LOOP_CNT times"
-
         sudo docker exec $DOCKER_OPTS redroid-rk3588-$USER \
             /system/bin/sh -c '[ -e /dev/binderfs/binder ] || exit 1'
         [ "$?" != "0" ] && echo '    /dev/binderfs/binder not available' && continue
         sudo docker exec $DOCKER_OPTS redroid-rk3588-$USER \
             /system/bin/sh -c '[ "$(ps |grep com.android.systemui)" != "" ] || exit 1'
         [ "$?" != "0" ] && echo '    com.android.systemui not available' && continue
-
         break
     done
 
-    # settings put global private_dns_mode off ;
-    GATEWAY=$(sudo docker inspect redroid-rk3588-$USER |grep '"Gateway"'| sed -e 's@[^0-9]*\([0-9].*[0-9]\)".*@\1@g'|sort -u)
-    CONIP=$(sudo docker inspect redroid-rk3588-$USER |grep '"IPAddress"'| sed -e 's@[^0-9]*\([0-9].*[0-9]\)".*@\1@g'|sort -u)
-    IPPRX=$(sudo docker inspect redroid-rk3588-$USER |grep '"IPPrefixLen"'| sed -e 's@[^0-9]*\([0-9]*\)[^0-9]*@\1@g'|sort -u)
-    sudo docker exec $DOCKER_OPTS redroid-rk3588-$USER  /system/bin/sh -c "
-        wm size ${MALIOR_DROID_WMSIZE:-1080x2160} ; \
-        sed -i 's@ro.secure=1@ro.secure=0@g' /system/build.prop ; \
-        setprop persist.sys.locale ${MALIOR_DROID_LANG:-en}; \
-        setprop persist.sys.timezone \"${MALIOR_DROID_TZ:-$(cat /etc/timezone)}\"; \
-        ip addr add $CONIP/$IPPRX dev eth0 ; \
-        ip route add default via $GATEWAY dev eth0 ; \
-        setprop ro.boot.redroid_net_ndns 2 ; \
-        setprop ro.boot.redroid_net_dns1 ${MALIOR_DROID_DNS1:-8.8.8.8} ; \
-        setprop ro.boot.redroid_net_dns2 ${MALIOR_DROID_DNS2:-8.8.4.4} ; \
-        /vendor/bin/ipconfigstore ; \
-        pm uninstall -k --user 0 com.firefly.fireflyapi2service ; \
-        pm uninstall -k --user 0 com.firefly.fireflyapi2service ; \
-        pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
-        pm uninstall -k --user 0 com.firefly.fireflyapi2demo ; \
-        stop;sleep 3;start; \
-    "
 }
 COMMAND=$1
 case $COMMAND in
