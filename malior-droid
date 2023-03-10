@@ -68,9 +68,11 @@ function runtime_start() {
     fi
 
     if [ "`sudo docker container ls -a|grep redroid-rk3588-$USER`" == "" ]; then
+        OVERLAY_BIND=$(sudo find $MALIOR_HOME/.local/malior/redroid_overlay -type f | sed -e 's@\(.*local.*redroid_overlay\)\(.*\)@-v \1\2:\2@g')
+        [ "$NO_OVERLAY" != "" ] && OVERLAY_BIND=""
         sudo docker run -itd --privileged --name redroid-rk3588-$USER \
             -v $MALIOR_HOME/.local/malior/redroid:/data \
-            $(sudo find $MALIOR_HOME/.local/malior/redroid_overlay -type f | sed -e 's@\(.*local.*redroid_overlay\)\(.*\)@-v \1\2:\2@g') \
+            $OVERLAY_BIND \
             -p ${MALIOR_DROID_PORT:-5555}:5555 \
             -v /dev/net/tun:/dev/tun -v /dev/mali0:/dev/mali0 \
             ${MALIOR_DROID_IMAGE}
